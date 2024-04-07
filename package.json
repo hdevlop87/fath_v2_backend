@@ -1,0 +1,50 @@
+{
+  "name": "auth.com.hdevlop",
+  "version": "1.0.0",
+  "description": "",
+  "main": "./src/server",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "ts-node ./src/server.ts",
+    "dev": "nodemon ./src/server.ts",
+    "generate": "drizzle-kit generate:pg ",
+    "push": "npx drizzle-kit push:pg ",
+    "studio": "npx drizzle-kit studio ",
+    "migrate": "ts-node src/db/migrate"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^1.6.7",
+    "bcryptjs": "^2.4.3",
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "date-fns": "^3.3.1",
+    "delay": "^6.0.0",
+    "dotenv": "^16.4.2",
+    "drizzle-orm": "^0.29.5",
+    "drizzle-zod": "^0.5.1",
+    "express": "^4.18.2",
+    "joi": "^17.12.1",
+    "js-cookie": "^3.0.5",
+    "jsonwebtoken": "^9.0.2",
+    "module-alias": "^2.2.3",
+    "pg": "^8.11.3",
+    "postgres": "^3.4.3",
+    "typescript": "^5.3.3"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.17",
+    "drizzle-kit": "^0.20.14",
+    "nodemon": "^3.0.3",
+    "postcss": "^8.4.35",
+    "tailwindcss": "^3.4.1",
+    "ts-node": "^10.9.2",
+    "tsconfig-paths": "^4.2.0"
+  },
+
+  "_moduleAliases": {
+    "@components": "dist/api/components",
+    "@services": "./src/services/*"
+  }
+}
