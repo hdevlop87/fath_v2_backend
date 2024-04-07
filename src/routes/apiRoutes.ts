@@ -107,7 +107,7 @@ const applyRouteGroup = (router, routes, middlewares = []) => {
     });
 };
 
-applyRouteGroup(router, publicRoutes);
+applyRouteGroup(router, publicRoutes, [isAdmin]);
 applyRouteGroup(router, authRoutes, [isAuth]);
 applyRouteGroup(router, adminRoutes);
 
