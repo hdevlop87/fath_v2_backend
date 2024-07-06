@@ -1,5 +1,5 @@
-import TokenService from '../services/TokenService';
-import UserValidator from '../services/UserValidator'
+import TokenService from '../services/auth/TokenService';
+import UserValidator from '../services/auth/UserValidator'
 import asyncHandler from '../lib/asyncHandler'
 
 const userValidator = new UserValidator();

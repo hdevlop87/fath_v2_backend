@@ -1,18 +1,14 @@
 [
-    {
+  {
       "roleName": "Admin",
-      "description": "Administrator role with full access"
-    },
-    {
-      "roleName": "Editor",
-      "description": "Editor role with limited access"
-    },
-    {
-      "roleName": "Viewer",
-      "description": "Viewer role with read-only access"
-    },
-    {
-      "roleName": "Manager",
-      "description": "Manager role with read-only access"
-    }
-  ]
+      "description": "Administrator role with all permissions."
+  },
+  {
+      "roleName": "User",
+      "description": "Regular user role with limited permissions."
+  },
+  {
+      "roleName": "Guest",
+      "description": "Guest user with minimal permissions."
+  }
+]

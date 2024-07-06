@@ -1,0 +1,8 @@
+{
+    "appName": "said o badiss",
+    "appLogoUrl": "storage/logo.png",
+    "appLargeLogoUrl": "storage/large-logo.png",
+    "dbUrl": "postgres://postgres:hicham2023@localhost:5432/saidobadiss",
+    "timeZone": "UTC",
+    "dateFormat": "YYYY-MM-DD"
+}

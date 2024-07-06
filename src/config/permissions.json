@@ -1,52 +1,50 @@
 [
   {
-    "permissionName": "view_users",
-    "description": "Can view all users"
+      "permissionName": "view_users",
+      "description": "Can view all users"
   },
   {
-    "permissionName": "delete_users",
-    "description": "Can delete all users"
+      "permissionName": "delete_users",
+      "description": "Can delete all users"
   },
   {
-    "permissionName": "create_user",
-    "description": "Can create a new user"
+      "permissionName": "create_user",
+      "description": "Can create a new user"
   },
   {
-    "permissionName": "update_user",
-    "description": "Can update a user"
+      "permissionName": "update_user",
+      "description": "Can update a user"
   },
   {
-    "permissionName": "get_user",
-    "description": "Can get a user"
+      "permissionName": "get_user",
+      "description": "Can get a user"
   },
   {
-    "permissionName": "get_user_roles",
-    "description": "Can get a user's roles"
+      "permissionName": "get_user_roles",
+      "description": "Can get a user's roles"
   },
   {
-    "permissionName": "get_user_permissions",
-    "description": "Can get a user's permissions"
-  },
-  
-
-  {
-    "permissionName": "view_roles",
-    "description": "Can view all roles"
+      "permissionName": "get_user_permissions",
+      "description": "Can get a user's permissions"
   },
   {
-    "permissionName": "create_role",
-    "description": "Can create a new role"
+      "permissionName": "view_roles",
+      "description": "Can view all roles"
   },
   {
-    "permissionName": "update_role",
-    "description": "Can update a role"
+      "permissionName": "create_role",
+      "description": "Can create a new role"
   },
   {
-    "permissionName": "delete_role",
-    "description": "Can delete a role"
+      "permissionName": "update_role",
+      "description": "Can update a role"
   },
   {
-    "permissionName": "get_role",
-    "description": "Can get a role"
+      "permissionName": "delete_role",
+      "description": "Can delete a role"
+  },
+  {
+      "permissionName": "get_role",
+      "description": "Can get a role"
   }
 ]

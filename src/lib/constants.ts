@@ -1,4 +1,3 @@
-import { pgEnum } from "drizzle-orm/pg-core";
 
 export const msg:any = {
   PASSWORD_UPDATE_REQUIRED: 'Please update your password to continue.',
@@ -13,6 +12,9 @@ export const msg:any = {
   USER_LOGOUT_SUCCESS: 'Logout successful.',
   USER_REGISTER_SUCCESS: 'Registration successful. Welcome!',
   USER_NOT_FOUND: 'No user found with the provided information.',
+
+  ADMIN_USER_CREATED_SUCCESS: 'Admin user created successfully',
+  ADMIN_USER_ALREADY_EXISTS: 'Admin user already exists',
 
   // User validator
   INVALID_CREDENTIALS: 'Invalid credentials. Please try again.',
@@ -150,6 +152,31 @@ export const msg:any = {
   LABOR: 'Labor',
   MISCELLANEOUS: 'Miscellaneous',
 
+  FILES_INIT_SUCCESS: 'Files initialized successfully',
+  FILES_RETRIEVED_SUCCESS: 'All files retrieved successfully.',
+  FILES_DELETED_SUCCESS: 'All files have been deleted.',
+  FILE_RETRIEVED_SUCCESS: 'File retrieved successfully.',
+  FILE_CREATED_SUCCESS: 'File created successfully.',
+  FILE_UPDATED_SUCCESS: 'File updated successfully.',
+  FILE_DELETED_SUCCESS: 'File deleted successfully.',
+  FILE_EXISTS: 'File name is already in use. Please choose another one.',
+  FILE_NOT_FOUND: 'File not found.',
+
+  FOLDERS_INIT_SUCCESS: 'Folders initialized successfully',
+  FOLDERS_RETRIEVED_SUCCESS: 'All folders retrieved successfully.',
+  FOLDERS_DELETED_SUCCESS: 'All folders have been deleted.',
+  FOLDER_RETRIEVED_SUCCESS: 'Folder retrieved successfully.',
+  FOLDER_CREATED_SUCCESS: 'Folder created successfully.',
+  FOLDER_UPDATED_SUCCESS: 'Folder updated successfully.',
+  FOLDER_DELETED_SUCCESS: 'Folder deleted successfully.',
+  FOLDER_EXISTS: 'Folder name is already in use. Please choose another one.',
+  FOLDER_NOT_FOUND: 'Folder not found.',
+
+  APP_INIT_COMPLETE: 'App initialization complete',
+  APP_INIT_FAILED: 'App initialization failed',
+
+  AGREEMENT_EMAIL_SUCCESS: 'The agreement document has been sent successfully',
+AGREEMENT_DOWNLOAD_SUCCESS: 'The agreement document has been successfully downloaded.'
 };
 
 
