@@ -65,6 +65,7 @@ const SaleController = {
         await customerValidator.validateCustomerSchema(customer);
         try {
             await customerValidator.checkCINExists(customer.CIN);
+            await customerValidator.checkPhoneExists(customer.phone);
             customer.customerId = crypto.randomUUID()
             newCustomer = await customerDb.createCustomer(customer);
         }
@@ -72,6 +73,7 @@ const SaleController = {
             if (error.message === msg.CIN_EXISTS) {
                 newCustomer = await customerDb.findCustomerByCIN(customer.CIN);
             }
+            throw error
         }
 
         //=== step1:check lot availability
@@ -107,7 +109,7 @@ const SaleController = {
 
     updateSale: asyncHandler(async (req, res) => {
         const saleId = req.params.id;
-        const { lotRef, customerId, pricePerM2, date } = req.body;
+        const { lotRef, customerId, pricePerM2, date ,isActif} = req.body;
 
         const sale = await saleValidator.checkSaleExists(saleId);
         const lotId = await lotDb.getLotIdByRef(lotRef);
@@ -134,13 +136,16 @@ const SaleController = {
             balanceDue:sale.balanceDue,
             paidPercentage:sale.paidPercentage,
             date,
-            status:sale.status,
+            status: isActif === false ? msg.CANCELED : sale.status,
             updatedAt: new Date(),
             createdAt:sale.createdAt,
         };
 
         const updatedSale = await saleDb.updateSale(saleId, saleDetails);
-        await saleDb.updateSaleOnPayment(saleId);
+
+        if (isActif !== false) {
+            await saleDb.updateSaleOnPayment(saleId);
+        }
         await lotDb.updateLotPricePerM2(lotId, pricePerM2);
         await lotDb.setOrphanedLotsAvailable();
         sendSuccess(res, updatedSale, msg.SALE_UPDATED_SUCCESS);

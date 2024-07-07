@@ -22,11 +22,7 @@ export default class CustomerValidator {
             phone: Joi.string().max(15).required(),
             address: Joi.string().allow('').optional(),
             CIN: Joi.string().max(50).required(),
-            email: Joi.string().email().max(100)
-                .when(Joi.ref('.'), {
-                    is: Joi.exist(),
-                    then: Joi.required(),
-                }),
+            email: Joi.optional(),
             image: Joi.string().optional(),
             file: Joi.any().optional(),
         });
