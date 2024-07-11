@@ -6,6 +6,7 @@ import TokenService from '../../../services/auth/TokenService';
 import asyncHandler from '../../../lib/asyncHandler';
 import { msg } from '../../../lib/constants';
 import UserDb from '../../auth/UserController/UserDb';
+import { v4 as uuidv4 } from 'uuid';
 
 const tokenService = new TokenService()
 const userValidator = new UserValidator()
@@ -55,7 +56,7 @@ const AuthController = {
         const hashedPassword = await hashPassword(password);
 
         const userDetails = {
-            id: crypto.randomUUID(),
+            id: uuidv4(),
             name,
             username,
             email,

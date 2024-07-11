@@ -6,6 +6,7 @@ import { eq } from "drizzle-orm";
 import { db } from '../../db/index'
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
+import { v4 as uuidv4 } from 'uuid';
 
 dotenv.config();
 
@@ -132,7 +133,7 @@ class TokenService {
         const refreshExpires = this.getRefreshTokenExpire();
 
         const tokenData = {
-            id: crypto.randomUUID(),
+            id: uuidv4(),
             userId,
             refreshToken,
             refreshExpires

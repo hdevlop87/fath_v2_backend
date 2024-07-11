@@ -8,6 +8,7 @@ import folderDb from './folderDb';
 import fileDb from '../fileController/fileDb'
 import fs from 'fs/promises';
 import path from 'path';
+import { v4 as uuidv4 } from 'uuid';
 
 const folderValidator = new FolderValidator();
 const storageManager = new StorageManager();
@@ -32,7 +33,7 @@ const FolderController = {
         await fs.mkdir(folderPath, { recursive: true });
 
         const newFolder = await folderDb.insertFolder({
-            id: crypto.randomUUID(),
+            id: uuidv4(),
             parentId,
             name,
             path: await storageManager.getRelativePath(folderPath)

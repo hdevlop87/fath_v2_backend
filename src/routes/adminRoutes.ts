@@ -14,7 +14,7 @@ import DocumentController from '../controllers/subdivision/documentController';
 import SettingController from '../controllers/subdivision/SettingController';
 
 const adminRoutes = [
-    
+    { path: 'users/changePassword/:id', method: 'post', handler: UserController.updatePassUser },
     { path: 'users', method: 'delete', handler: UserController.deleteAllUsers },
     { path: 'users', method: 'post', handler: UserController.createUser },
     { path: 'users/:id', method: 'patch', handler: UserController.updateUser },

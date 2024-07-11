@@ -10,7 +10,7 @@ import UserDb from './controllers/auth/UserController/UserDb';
 import { hashPassword } from './lib/utils';
 import StorageManager from './services/storage/StorageManager';
 import dotenv from 'dotenv';
-import crypto from 'crypto';
+import { v4 as uuidv4 } from 'uuid';
 
 dotenv.config();
 
@@ -103,7 +103,7 @@ const initializeAdminUser = async () => {
         if (!existingAdmin) {
             const hashedPassword = await hashPassword(process.env.ADMIN_PASSWORD); 
             const adminUser = {
-                id: crypto.randomUUID(),
+                id: uuidv4(),
                 name: process.env.ADMIN_NAME,
                 username: process.env.ADMIN_USERNAME,
                 email: process.env.ADMIN_EMAIL,

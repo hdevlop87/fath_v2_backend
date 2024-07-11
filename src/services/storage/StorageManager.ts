@@ -2,6 +2,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import { getFileTypeInfo } from '../../lib/utils';
 import folderDb from '../../controllers/storage/folderController/folderDb';
+import { v4 as uuidv4 } from 'uuid';
 
 class StorageManager {
     static instance = null;
@@ -40,7 +41,7 @@ class StorageManager {
     }
 
     async getUUID() {
-        return crypto.randomUUID();
+        return uuidv4()
     }
 
     async cleanTempFolder() {

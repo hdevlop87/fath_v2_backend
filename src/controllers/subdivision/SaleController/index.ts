@@ -10,7 +10,7 @@ import { parseCSVFile } from '../../../lib/utils';
 import { msg } from '../../../lib/constants';
 import lotDb from './../LotController/LotDb';
 import saleDb from './SaleDb';
-
+import { v4 as uuidv4 } from 'uuid';
 import path from 'path';
 import fs from 'fs';
 
@@ -66,7 +66,7 @@ const SaleController = {
         try {
             await customerValidator.checkCINExists(customer.CIN);
             await customerValidator.checkPhoneExists(customer.phone);
-            customer.customerId = crypto.randomUUID()
+            customer.customerId = uuidv4()
             newCustomer = await customerDb.createCustomer(customer);
         } 
         catch (error) {

@@ -14,7 +14,7 @@ import SettingController from '../controllers/subdivision/SettingController';
 const authRoutes = [
     { path: 'dashData/', method: 'get', handler: DashDataController.getDashData },
     
-    { path: 'users/changePassword/:id', method: 'post', handler: UserController.updatePassUser },
+    
     { path: 'users/getRole/:id', method: 'get', handler: UserController.getUserRole },
     { path: 'users/getPermissions/:id', method: 'get', handler: UserController.getUserPermissions },
     { path: 'users', method: 'get', handler: UserController.getAllUsers },

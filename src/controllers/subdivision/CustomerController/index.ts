@@ -7,6 +7,7 @@ import LotDb from '../LotController/LotDb';
 import customerDb from './CustomerDb';
 import path from 'path';
 import fs from 'fs';
+import { v4 as uuidv4 } from 'uuid';
 
 const customerValidator = new CustomerValidator()
 
@@ -32,7 +33,7 @@ const CustomerController = {
         await customerValidator.checkPhoneExists(customerDetail.phone);
         await customerValidator.checkEmailExists(customerDetail.email);
         await customerValidator.checkCINExists(customerDetail.CIN);
-        customerDetail.customerId = crypto.randomUUID();
+        customerDetail.customerId = uuidv4()
         const newCustomer = await customerDb.createCustomer(customerDetail);
         sendSuccess(res, newCustomer, msg.CUSTOMER_CREATED_SUCCESS, 201);
     }),

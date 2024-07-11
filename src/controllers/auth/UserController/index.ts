@@ -9,6 +9,7 @@ import { users } from '../../../db/schema';
 import { db } from '../../../db/index'
 import UserDb from './UserDb';
 import {delay} from '../../../lib/utils'
+import { v4 as uuidv4 } from 'uuid';
 
 const roleValidator = new RoleValidator()
 const userValidator = new UserValidator()
@@ -50,7 +51,7 @@ const UserController = {
       const hashedPassword = await hashPassword(password);
 
       const userDetails = {
-         id: crypto.randomUUID(),
+         id: uuidv4(),
          name,
          username,
          email,

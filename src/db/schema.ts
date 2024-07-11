@@ -24,7 +24,7 @@ export const users = pgTable("users", {
     email: text("email").notNull(),
     emailVerified: boolean("emailVerified").default(false),
     image: text("image"),
-    status: userStatusEnum("status").default('Inactive'),
+    status: userStatusEnum("status").default('Active'),
     createdAt: timestamp('created_at').defaultNow(),
     updatedAt: timestamp('updated_at').defaultNow(),
     roleId: integer("roleId").references(() => roles.roleId, { onDelete: 'set null' }),

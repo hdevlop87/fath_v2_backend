@@ -7,6 +7,7 @@ import { upload } from './multerConfig';
 import { promises as fs } from 'fs';
 import fileDb from './fileDb';
 import path from 'path';
+import { v4 as uuidv4 } from 'uuid';
 
 const fileValidator = new FileValidator();
 const storageManager = new StorageManager();
@@ -74,7 +75,7 @@ const FileController = {
 
             const newFile = await fileDb.insertFile({
                 ...fileDetails,
-                id: crypto.randomUUID(),
+                id: uuidv4(),
                 parentId: parentFolder.id,
                 filename: fileInfo.filename,
                 path: fileInfo.path,
