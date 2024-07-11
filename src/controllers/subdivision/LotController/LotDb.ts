@@ -21,7 +21,7 @@ const lotDb = {
             saleId: sales.saleId,
             totalPrice: sales.totalPrice,
             customerId: sales.customerId,
-            customerName: customers.name
+            customerName: sql`${customers.firstName} || ' ' || ${customers.lastName} AS customerName`
         })
         .from(lots)
         .leftJoin(sales, eq(lots.lotId, sales.lotId))

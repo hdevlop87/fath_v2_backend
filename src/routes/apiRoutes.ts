@@ -8,7 +8,7 @@ import publicRoutes from './publicRoutes';
 
 const router = express.Router();
 
-const applyRouteGroup = (router, routes, middlewares = []) => {
+const applyRouteGroup = (routes, middlewares = []) => {
     routes.forEach(({ path, method, handler }) => {
         if (router[method]) {
             router[method](`/${path}`, ...middlewares, handler);
@@ -18,9 +18,9 @@ const applyRouteGroup = (router, routes, middlewares = []) => {
     });
 };
 
-applyRouteGroup(router, publicRoutes);
-applyRouteGroup(router, authRoutes,[isAuth]);
-applyRouteGroup(router, adminRoutes,[isAdmin]);
+applyRouteGroup(publicRoutes);
+applyRouteGroup(authRoutes,[isAuth]);
+applyRouteGroup(adminRoutes,[isAdmin]);
 
 
 export default router;

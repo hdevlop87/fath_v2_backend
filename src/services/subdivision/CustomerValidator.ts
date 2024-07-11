@@ -16,7 +16,8 @@ export default class CustomerValidator {
         }
         this.customerSchema = Joi.object({
             customerId: Joi.string().optional(),
-            name: Joi.string().max(100).required(),
+            lastName: Joi.string().max(100).required(),
+            firstName: Joi.string().max(100).required(),
             gender: Joi.string().max(100).optional(),
             birthday: Joi.string().max(100).optional(),
             phone: Joi.string().max(15).required(),

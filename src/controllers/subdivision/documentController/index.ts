@@ -33,13 +33,14 @@ const prepareSaleData = async (saleId) => {
         paymentReference: payment.paymentReference,
     }));
 
-    const { customerId, name, phone, email, address, CIN } = customer;
+    const { customerId, firstName,lastName, phone, email, address, CIN } = customer;
     const { lotRef, size, zoningCode, pricePerM2 } = lot;
     const { totalPrice } = sale;
 
     return {
         customerId,
-        name,
+        firstName,
+        lastName,
         phone,
         email,
         address,
@@ -119,8 +120,8 @@ const DocumentController = {
     downloadAgreement: asyncHandler(async (req, res) => {
         const saleId = req.params.id;
         const preparedData = await prepareSaleData(saleId);
-        const { customerId, lotRef, name } = preparedData;
-        const filename = `${name}_${lotRef}_agreement`;
+        const { customerId, lotRef, firstName,lastName } = preparedData;
+        const filename = `${firstName}_${lastName}_${lotRef}_agreement`;
 
         const file = await saveDocument(preparedData, customerId, filename);
         sendSuccess(res, file, msg.AGREEMENT_DOWNLOAD_SUCCESS);
@@ -129,8 +130,8 @@ const DocumentController = {
     sendAgreementByMail: asyncHandler(async (req, res) => {
         const saleId = req.params.id;
         const preparedData = await prepareSaleData(saleId);
-        const { customerId, lotRef, name } = preparedData;
-        const filename = `${name}_${lotRef}_agreement`;
+        const { customerId, lotRef, firstName,lastName } = preparedData;
+        const filename = `${firstName}_${lastName}_${lotRef}_agreement`;
 
         const buffer = generateDocument(preparedData);
         await sendMailWithAttachment(filename, buffer);

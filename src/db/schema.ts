@@ -61,14 +61,15 @@ export const tokens = pgTable("tokens", {
 
 export const customers = pgTable("customers", {
     customerId: text("customerId").notNull().primaryKey(),
-    name: varchar("name", { length: 100 }).notNull(),
+    firstName: text("firstName").notNull(),
+    lastName: text("lastName").notNull(),
     gender: varchar("gender", { length: 100 }),
     birthday: varchar("birthday", { length: 100 }),
     phone: varchar("phone", { length: 15 }).unique().notNull(),
     email: varchar("email", { length: 100 }),
     address: text("address"),
     CIN: varchar("CIN", { length: 50 }).unique().notNull(),
-    image: text("image"),
+    image: text("image").default("noavatar.png"),
     createdAt: timestamp('created_at').defaultNow(),
     updatedAt: timestamp('updated_at').defaultNow(),
 });

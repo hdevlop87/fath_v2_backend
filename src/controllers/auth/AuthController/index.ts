@@ -128,15 +128,15 @@ const AuthController = {
 
         res.cookie('refreshToken', token, {
             httpOnly: true,
-            secure: true,
-            sameSite: 'None',
+            //secure: true,
+            sameSite: 'Lax',
             maxAge,
             ...options,
         });
 
         res.cookie('refreshTokenExpiresAt', refreshTokenExpiresAt, {
-            secure: true,
-            sameSite: 'None',
+            //secure: true,
+            sameSite: 'Lax',
             maxAge,
             ...options,
         });
@@ -145,14 +145,14 @@ const AuthController = {
     clearCookies: (res, options = {}) => {
         res.clearCookie('refreshToken', {
             httpOnly: true,
-            secure: true,
-            sameSite: 'None',
+            //secure: true,
+            sameSite: 'Lax',
             ...options,
         });
 
         res.clearCookie('refreshTokenExpiresAt', {
-            secure: true,
-            sameSite: 'None',
+            //secure: true,
+            sameSite: 'Lax',
             ...options
         });
     },

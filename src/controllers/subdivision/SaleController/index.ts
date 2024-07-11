@@ -6,7 +6,7 @@ import paymentDb from '../PaymentController/PaymentDb';
 import SaleValidator from '../../../services/subdivision/SaleValidator';
 import LotValidator from '../../../services/subdivision/LotValidator';
 import asyncHandler from '../../../lib/asyncHandler';
-import {parseCSVFile} from '../../../lib/utils';
+import { parseCSVFile } from '../../../lib/utils';
 import { msg } from '../../../lib/constants';
 import lotDb from './../LotController/LotDb';
 import saleDb from './SaleDb';
@@ -68,12 +68,17 @@ const SaleController = {
             await customerValidator.checkPhoneExists(customer.phone);
             customer.customerId = crypto.randomUUID()
             newCustomer = await customerDb.createCustomer(customer);
-        }
+        } 
         catch (error) {
-            if (error.message === msg.CIN_EXISTS) {
+            if (error.message == msg.CIN_EXISTS) {
                 newCustomer = await customerDb.findCustomerByCIN(customer.CIN);
+            } 
+            else if (error.message == msg.PHONE_EXISTS) {  
+                newCustomer = await customerDb.findCustomerByPhone(customer.phone);
+            } 
+            else {
+                throw error;
             }
-            throw error
         }
 
         //=== step1:check lot availability
@@ -109,36 +114,36 @@ const SaleController = {
 
     updateSale: asyncHandler(async (req, res) => {
         const saleId = req.params.id;
-        const { lotRef, customerId, pricePerM2, date ,isActif} = req.body;
+        const { lotRef, customerId, pricePerM2, date, isActif } = req.body;
 
         const sale = await saleValidator.checkSaleExists(saleId);
         const lotId = await lotDb.getLotIdByRef(lotRef);
-        
+
         if (lotId && (lotId !== sale.lotId)) {
             await saleValidator.checkLotExistsInSales(lotId, saleId);
             await lotValidator.checkLotExists(lotId);
             await lotValidator.checkLotAvailability(lotId);
         }
-        
+
         if (customerId) {
             await customerValidator.checkCustomerExists(customerId);
         }
-        
+
         const lotSize: any = await lotDb.getLotSize(lotId);
         const totalPrice = pricePerM2 ? lotSize * parseFloat(pricePerM2) : sale.totalPrice;
-        
+
         const saleDetails = {
             saleId,
             lotId,
             customerId,
             totalPrice,
-            totalVerifiedPayments:sale.totalVerifiedPayments,
-            balanceDue:sale.balanceDue,
-            paidPercentage:sale.paidPercentage,
+            totalVerifiedPayments: sale.totalVerifiedPayments,
+            balanceDue: sale.balanceDue,
+            paidPercentage: sale.paidPercentage,
             date,
             status: isActif === false ? msg.CANCELED : sale.status,
             updatedAt: new Date(),
-            createdAt:sale.createdAt,
+            createdAt: sale.createdAt,
         };
 
         const updatedSale = await saleDb.updateSale(saleId, saleDetails);
@@ -198,7 +203,7 @@ const SaleController = {
             return sendError(res, 'Invalid or missing file path', 400);
         }
 
-        const salesData:any = await parseCSVFile(filePath);
+        const salesData: any = await parseCSVFile(filePath);
 
         let addedSales = [];
         let skippedSales = [];

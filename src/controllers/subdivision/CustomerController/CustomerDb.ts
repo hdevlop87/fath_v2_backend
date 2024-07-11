@@ -7,7 +7,8 @@ const customerDb = {
         const result = await db
             .select({
                 customerId: customers.customerId,
-                name: customers.name,
+                firstName: customers.firstName,
+                lastName: customers.lastName,
                 gender:customers.gender,
                 birthday:customers.birthday,
                 phone: customers.phone,
@@ -36,6 +37,11 @@ const customerDb = {
     findCustomerByCIN: async (CIN) => {
         const [customer] = await db.select().from(customers).where(eq(customers.CIN, CIN));
         return customer
+    },
+
+    findCustomerByPhone: async (phone) => {
+        const [customer] = await db.select().from(customers).where(eq(customers.phone, phone));
+        return customer;
     },
 
     createCustomer: async (customerDetail) => {

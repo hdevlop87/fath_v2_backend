@@ -1,7 +1,7 @@
 import { sendSuccess, sendError } from '../../../services/responseHandler';
 import CustomerValidator from '../../../services/subdivision/CustomerValidator';
 import asyncHandler from '../../../lib/asyncHandler';
-import {parseCSVFile} from '../../../lib/utils';
+import { parseCSVFile } from '../../../lib/utils';
 import { msg } from '../../../lib/constants';
 import LotDb from '../LotController/LotDb';
 import customerDb from './CustomerDb';
@@ -32,7 +32,7 @@ const CustomerController = {
         await customerValidator.checkPhoneExists(customerDetail.phone);
         await customerValidator.checkEmailExists(customerDetail.email);
         await customerValidator.checkCINExists(customerDetail.CIN);
-        customerDetail.customerId = crypto.randomUUID()
+        customerDetail.customerId = crypto.randomUUID();
         const newCustomer = await customerDb.createCustomer(customerDetail);
         sendSuccess(res, newCustomer, msg.CUSTOMER_CREATED_SUCCESS, 201);
     }),
@@ -105,13 +105,13 @@ const CustomerController = {
     }),
 
     bulkAddCustomersFromCSV: asyncHandler(async (req, res) => {
-        const filePath = req.body.path; 
+        const filePath = req.body.path;
 
         if (!filePath || !fs.existsSync(filePath)) {
             return sendError(res, 'Invalid or missing file path', 400);
         }
 
-        const customersData:any = await parseCSVFile(filePath);
+        const customersData: any = await parseCSVFile(filePath);
 
         let addedCustomers = [];
         let skippedCustomers = [];

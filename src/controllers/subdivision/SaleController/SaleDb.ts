@@ -23,7 +23,7 @@ const saleDb = {
             lotRef: lots.lotRef,
             size: lots.size,
             pricePerM2: lots.pricePerM2,
-            customerName: customers.name,
+            customerName: sql`${customers.firstName} || ' ' || ${customers.lastName} AS customerName`
         })
             .from(sales)
             .leftJoin(lots, eq(sales.lotId, lots.lotId))
@@ -51,7 +51,7 @@ const saleDb = {
             lotRef: lots.lotRef,
             size: lots.size,
             pricePerM2: lots.pricePerM2,
-            customerName: customers.name,
+            customerName: sql`${customers.firstName} || ' ' || ${customers.lastName} AS customerName`
         })
             .from(sales)
             .leftJoin(lots, eq(sales.lotId, lots.lotId))
@@ -77,7 +77,7 @@ const saleDb = {
             lotRef: lots.lotRef,
             size: lots.size,
             pricePerM2: lots.pricePerM2,
-            customerName: customers.name,
+            customerName: sql`${customers.firstName} || ' ' || ${customers.lastName} AS customerName`
         })
             .from(sales)
             .leftJoin(lots, eq(sales.lotId, lots.lotId))
@@ -104,7 +104,7 @@ const saleDb = {
             lotRef: lots.lotRef,
             size: lots.size,
             pricePerM2: lots.pricePerM2,
-            customerName: customers.name,
+            customerName: sql`${customers.firstName} || ' ' || ${customers.lastName} AS customerName`
         })
             .from(sales)
             .leftJoin(lots, eq(sales.lotId, lots.lotId))
