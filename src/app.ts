@@ -6,10 +6,15 @@ import path from 'path';
 
 const app = express();
 
-const allowedOrigins = ['http://localhost:3000','http://192.168.1.107:3000', 'http://192.168.1.107:5000']; 
+const allowedOrigins = [
+    'http://38.242.196.111:3000',
+    'http://localhost:3000',
+    'http://obadis.ma',
+    'https://obadis.ma'
+];
 
 app.use(cors({
-    origin: function (origin, callback) {
+    origin: (origin, callback) => {
         if (!origin) return callback(null, true);
         if (allowedOrigins.indexOf(origin) === -1) {
             const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
@@ -22,9 +27,13 @@ app.use(cors({
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static('public'));
 app.use(cookieParser());
-app.use('/storage', express.static(path.join(process.cwd(), "storage")));
+app.use(express.static('public'));
+app.use('/storage', express.static(path.join(process.cwd(), 'storage')));
 app.use('/api', ApiRoutes);
+
+app.get('/', (req, res) => {
+    res.json({ message: 'API is working!' });
+});
 
 export default app;
