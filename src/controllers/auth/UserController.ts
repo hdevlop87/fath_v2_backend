@@ -1,14 +1,14 @@
 import { eq } from "drizzle-orm";
-import { sendSuccess } from '../../../services/responseHandler';
-import RoleValidator from '../../../services/auth/RoleValidator';
-import UserValidator from '../../../services/auth/UserValidator'
-import asyncHandler from '../../../lib/asyncHandler'
-import { hashPassword } from '../../../lib/utils'
-import { msg } from '../../../lib/constants';
-import { users } from '../../../db/schema';
-import { db } from '../../../db/index'
-import UserDb from './UserDb';
-import {delay} from '../../../lib/utils'
+import { sendSuccess } from '../../services/responseHandler';
+import RoleValidator from '../../services/auth/RoleValidator';
+import UserValidator from '../../services/auth/UserValidator'
+import asyncHandler from '../../lib/asyncHandler'
+import { hashPassword } from '../../lib/utils'
+import { msg } from '../../lib/constants';
+import { users } from '../../db/schema';
+import { db } from '../../db/index'
+import UserDb from '../../repositories/UserDb';
+import {delay} from '../../lib/utils'
 import { v4 as uuidv4 } from 'uuid';
 
 const roleValidator = new RoleValidator()

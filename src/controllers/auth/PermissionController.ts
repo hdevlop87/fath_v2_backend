@@ -1,11 +1,11 @@
-import { sendSuccess, sendError } from '../../../services/responseHandler';
-import PermissionValidator from '../../../services/auth/PermissionValidator';
-import RoleValidator from '../../../services/auth/RoleValidator';
-import asyncHandler from '../../../lib/asyncHandler';
-import { permissions } from '../../../db/schema';
-import { msg } from '../../../lib/constants';
+import { sendSuccess, sendError } from '../../services/responseHandler';
+import PermissionValidator from '../../services/auth/PermissionValidator';
+import RoleValidator from '../../services/auth/RoleValidator';
+import asyncHandler from '../../lib/asyncHandler';
+import { permissions } from '../../db/schema';
+import { msg } from '../../lib/constants';
 import { eq, sql } from "drizzle-orm";
-import { db } from '../../../db/index'
+import { db } from '../../db/index'
 import path from 'path';
 import fs from 'fs';
 

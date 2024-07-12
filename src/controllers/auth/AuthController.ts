@@ -1,16 +1,16 @@
-import { sendSuccess, sendError } from '../../../services/responseHandler';
-import { hashPassword, comparePassword } from '../../../lib/utils';
-import UserValidator from '../../../services/auth/UserValidator';
-import RoleValidator from '../../../services/auth/RoleValidator';
-import TokenService from '../../../services/auth/TokenService';
-import asyncHandler from '../../../lib/asyncHandler';
-import { msg } from '../../../lib/constants';
-import UserDb from '../../auth/UserController/UserDb';
+import { sendSuccess, sendError } from '../../services/responseHandler';
+import { hashPassword, comparePassword } from '../../lib/utils';
+import UserValidator from '../../services/auth/UserValidator';
+import RoleValidator from '../../services/auth/RoleValidator';
+import TokenService from '../../services/auth/TokenService';
+import asyncHandler from '../../lib/asyncHandler';
+import { msg } from '../../lib/constants';
+import UserDb from '../../repositories/UserDb';
 import { v4 as uuidv4 } from 'uuid';
 
-const tokenService = new TokenService()
-const userValidator = new UserValidator()
-const roleValidator = new RoleValidator()
+const tokenService = new TokenService();
+const userValidator = new UserValidator();
+const roleValidator = new RoleValidator();
 
 const AuthController = {
 

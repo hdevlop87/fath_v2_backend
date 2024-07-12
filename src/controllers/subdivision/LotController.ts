@@ -1,9 +1,9 @@
-import { sendSuccess, sendError } from '../../../services/responseHandler';
-import LotValidator from '../../../services/subdivision/LotValidator';
-import asyncHandler from '../../../lib/asyncHandler';
-import {parseCSVFile} from '../../../lib/utils';
-import { msg } from '../../../lib/constants';
-import lotDb from './LotDb';
+import { sendSuccess, sendError } from '../../services/responseHandler';
+import LotValidator from '../../services/subdivision/LotValidator';
+import asyncHandler from '../../lib/asyncHandler';
+import {parseCSVFile} from '../../lib/utils';
+import LotDb from '../../repositories/LotDb';
+import { msg } from '../../lib/constants';
 import path from 'path';
 import fs from 'fs';
 
@@ -12,18 +12,18 @@ const lotValidator = new LotValidator()
 const LotController = {
     //===================== many lots actions ======================//
     getAllLots: asyncHandler(async (req, res) => {
-        const allLots = await lotDb.findAllLots();
+        const allLots = await LotDb.findAllLots();
         sendSuccess(res, allLots, msg.LOTS_RETRIEVED_SUCCESS);
     }),
 
     getLotsMap: asyncHandler(async (req, res) => {
-        const allLots = await lotDb.findLotMap();
+        const allLots = await LotDb.findLotMap();
         sendSuccess(res, allLots, msg.LOTS_RETRIEVED_SUCCESS);
     }),
 
     deleteAllLots: asyncHandler(async (req, res) => {
-        await lotDb.deleteAllLots();
-        await lotDb.resetSequence();
+        await LotDb.deleteAllLots();
+        await LotDb.resetSequence();
         sendSuccess(res, null, msg.LOTS_DELETED_SUCCESS);
     }),
     //===============================================================//
@@ -32,7 +32,7 @@ const LotController = {
         const lotDetail = req.body;
         await lotValidator.validateLotSchema(lotDetail);
         await lotValidator.checkLotRefExists(lotDetail.lotRef);
-        const newLot = await lotDb.createLot(lotDetail);
+        const newLot = await LotDb.createLot(lotDetail);
         sendSuccess(res, newLot, msg.LOT_CREATED_SUCCESS, 201);
     }),
 
@@ -46,7 +46,7 @@ const LotController = {
             await lotValidator.checkLotRefExists(lotDetails.lotRef, lotId);
         }
         const updatedLotDetails = { ...existingLot, ...lotDetails };
-        const updatedLot = await lotDb.updateLot(lotId, updatedLotDetails);
+        const updatedLot = await LotDb.updateLot(lotId, updatedLotDetails);
         sendSuccess(res, updatedLot, msg.LOT_UPDATED_SUCCESS);
     }),
 
@@ -59,8 +59,8 @@ const LotController = {
     deleteLotById: asyncHandler(async (req, res) => {
         const lotId = req.params.id;
         await lotValidator.checkLotExists(lotId);
-        const lot = await lotDb.deleteLotById(lotId);
-        await lotDb.resetSequence();
+        const lot = await LotDb.deleteLotById(lotId);
+        await LotDb.resetSequence();
         sendSuccess(res, lot, msg.LOT_DELETED_SUCCESS);
     }),
 
@@ -75,7 +75,7 @@ const LotController = {
             try {
                 await lotValidator.validateLotSchema(lot);
                 await lotValidator.checkLotRefExists(lot.lotRef, null);
-                const newLot = await lotDb.createLot(lot);
+                const newLot = await LotDb.createLot(lot);
                 addedLots.push(newLot);
             }
             catch (error) {
@@ -107,7 +107,7 @@ const LotController = {
                 try {
                     await lotValidator.validateLotSchema(lot);
                     await lotValidator.checkLotRefExists(lot.lotRef, null);
-                    const newLot = await lotDb.createLot(lot);
+                    const newLot = await LotDb.createLot(lot);
                     addedLots.push(newLot);
                 } catch (error) {
                     if (error.message.includes(msg.LOT_EXISTS)) {

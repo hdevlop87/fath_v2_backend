@@ -1,19 +1,22 @@
-import { formatNumber, formatDate } from '../../../lib/utils';
+import { formatNumber, formatDate } from '../../lib/utils';
 import { format } from 'date-fns';
 import fs from 'fs';
 import PizZip from 'pizzip';
 import Docxtemplater from 'docxtemplater';
-import saleDb from '../SaleController/SaleDb';
-import fileDb from '../../storage/fileController/fileDb';
-import asyncHandler from '../../../lib/asyncHandler';
+import saleDb from '../../repositories/SaleDb';
+import fileDb from '../../repositories/fileDb';
+import asyncHandler from '../../lib/asyncHandler';
 import path from 'path';
-import SaleValidator from '../../../services/subdivision/SaleValidator';
-import CustomerValidator from '../../../services/subdivision/CustomerValidator';
-import LotValidator from '../../../services/subdivision/LotValidator';
-import StorageManager from '../../../services/storage/StorageManager';
-import { sendSuccess, sendError } from '../../../services/responseHandler';
-import { msg } from '../../../lib/constants';
+import SaleValidator from '../../services/subdivision/SaleValidator';
+import CustomerValidator from '../../services/subdivision/CustomerValidator';
+import LotValidator from '../../services/subdivision/LotValidator';
+import StorageManager from '../../services/storage/StorageManager';
+import { sendSuccess } from '../../services/responseHandler';
+import { msg } from '../../lib/constants';
 import nodemailer from 'nodemailer';
+import { v4 as uuidv4 } from 'uuid';
+import AgreementDb from '../../repositories/AgreementDb';
+import FolderDb from '../../repositories/folderDb'
 
 const saleValidator = new SaleValidator();
 const customerValidator = new CustomerValidator();
@@ -33,7 +36,7 @@ const prepareSaleData = async (saleId) => {
         paymentReference: payment.paymentReference,
     }));
 
-    const { customerId, firstName,lastName, phone, email, address, CIN } = customer;
+    const { customerId, firstName, lastName, phone, email, address, CIN } = customer;
     const { lotRef, size, zoningCode, pricePerM2 } = lot;
     const { totalPrice } = sale;
 
@@ -52,6 +55,7 @@ const prepareSaleData = async (saleId) => {
         pricePerM2: formatNumber(pricePerM2),
         timeStamp: format(new Date(), 'yyyy-MM-dd'),
         payments: newPayments,
+        saleId
     };
 };
 
@@ -69,26 +73,33 @@ const generateDocument = (data) => {
     return doc.getZip().generate({ type: 'nodebuffer' });
 };
 
-const saveDocument = async (data, customerId, filename) => {
+const saveDocument = async (data, filename) => {
 
-    const outputPath = path.join(process.cwd(), 'storage', 'agreements', `${filename}.docx`);
+    const { customerId, saleId } = data
+    const parentFolderPath = await FolderDb.getFolderPath(customerId)
+    const outputPath = path.join(parentFolderPath, `${filename}.docx`);
     const buffer = generateDocument(data);
-    await fileDb.deleteFileById(customerId);
 
-    fs.writeFileSync(outputPath, buffer);
-    const fileInfo = fs.statSync(outputPath);
-
-    return await fileDb.insertFile({
-        id: customerId,
-        parentId: '77777777-7777-7777-7777-777777777777',
+    const file = await fileDb.insertFile({
+        id: uuidv4(),
+        parentId: customerId,
         filename,
-        path: await storageManager.getRelativePath(outputPath),
+        path: outputPath,
         name: filename,
         type: 'docx',
         icon: 'doc.png',
         category: 'file',
-        size: fileInfo.size,
+        size: "1Mb",
     });
+
+    await AgreementDb.createAgreement({
+        agreementId: uuidv4(),
+        saleId: saleId,
+        fileId: file.id,
+    });
+
+    fs.writeFileSync(outputPath, buffer);
+    return file;
 };
 
 const sendMailWithAttachment = async (name, buffer) => {
@@ -120,17 +131,17 @@ const DocumentController = {
     downloadAgreement: asyncHandler(async (req, res) => {
         const saleId = req.params.id;
         const preparedData = await prepareSaleData(saleId);
-        const { customerId, lotRef, firstName,lastName } = preparedData;
+        const { lotRef, firstName, lastName } = preparedData;
         const filename = `${firstName}_${lastName}_${lotRef}_agreement`;
 
-        const file = await saveDocument(preparedData, customerId, filename);
+        const file = await saveDocument(preparedData, filename);
         sendSuccess(res, file, msg.AGREEMENT_DOWNLOAD_SUCCESS);
     }),
 
     sendAgreementByMail: asyncHandler(async (req, res) => {
         const saleId = req.params.id;
         const preparedData = await prepareSaleData(saleId);
-        const { customerId, lotRef, firstName,lastName } = preparedData;
+        const { lotRef, firstName, lastName } = preparedData;
         const filename = `${firstName}_${lastName}_${lotRef}_agreement`;
 
         const buffer = generateDocument(preparedData);

@@ -1,13 +1,13 @@
-import ExpenseValidator from '../../../services/subdivision/ExpenseValidator';
-import { sendSuccess, sendError } from '../../../services/responseHandler';
-import asyncHandler from '../../../lib/asyncHandler'
-import saleDb from '../SaleController/SaleDb';
-import fileDb from '../../storage/fileController/fileDb';
-import {parseCSVFile} from '../../../lib/utils';
-import { msg } from '../../../lib/constants';
-import expenseDb from './ExpenseDb';
-import path from 'path';
+import ExpenseValidator from '../../services/subdivision/ExpenseValidator';
+import { sendSuccess, sendError } from '../../services/responseHandler';
+import expenseDb from '../../repositories/ExpenseDb';
+import asyncHandler from '../../lib/asyncHandler'
+import saleDb from '../../repositories/SaleDb';
+import fileDb from '../../repositories/fileDb';
+import {parseCSVFile} from '../../lib/utils';
 import { promises as fsPromises } from 'fs';
+import { msg } from '../../lib/constants';
+import path from 'path';
 import fs from 'fs';
 
 const expenseValidator = new ExpenseValidator();

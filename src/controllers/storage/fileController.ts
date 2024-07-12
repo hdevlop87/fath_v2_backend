@@ -1,11 +1,11 @@
-import { sendSuccess, sendError } from '../../../services/responseHandler';
-import FileValidator from '../../../services/storage/FileValidator';
-import StorageManager from '../../../services/storage/StorageManager';
-import asyncHandler from '../../../lib/asyncHandler';
-import { msg } from '../../../lib/constants';
+import { sendSuccess, sendError } from '../../services/responseHandler';
+import FileValidator from '../../services/storage/FileValidator';
+import StorageManager from '../../services/storage/StorageManager';
+import asyncHandler from '../../lib/asyncHandler';
+import { msg } from '../../lib/constants';
 import { upload } from './multerConfig';
 import { promises as fs } from 'fs';
-import fileDb from './fileDb';
+import fileDb from '../../repositories/fileDb';
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 

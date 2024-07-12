@@ -4,11 +4,11 @@
       "description": "Administrator role with all permissions."
   },
   {
-      "roleName": "User",
-      "description": "Regular user role with limited permissions."
+      "roleName": "Editor",
+      "description": "Regular Editor role with limited permissions."
   },
   {
-      "roleName": "Guest",
-      "description": "Guest user with minimal permissions."
+      "roleName": "Viewer",
+      "description": "Viewer user with minimal permissions."
   }
 ]

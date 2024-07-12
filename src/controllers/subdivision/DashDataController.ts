@@ -1,12 +1,12 @@
-import { sendSuccess, sendError } from '../../../services/responseHandler';
-import { sales, payments, lots, customers } from '../../../db/schema';
-import { eq, sql, and } from "drizzle-orm";
-import { db } from '../../../db/index';
-import paymentDb from '../PaymentController/PaymentDb';
-import asyncHandler from '../../../lib/asyncHandler';
-import { msg } from '../../../lib/constants';
-import saleDb from '../SaleController/SaleDb';
-import ExpenseDb from '../ExpenseController/ExpenseDb';
+import { sendSuccess } from '../../services/responseHandler';
+import ExpenseDb from '../../repositories/ExpenseDb';
+import paymentDb from '../../repositories/PaymentDb';
+import asyncHandler from '../../lib/asyncHandler';
+import saleDb from '../../repositories/SaleDb';
+import {  payments } from '../../db/schema';
+import { msg } from '../../lib/constants';
+import { eq, sql } from "drizzle-orm";
+import { db } from '../../db/index';
 
 const dashDataController = {
 

@@ -46,11 +46,11 @@ export default class CustomerValidator {
     }
 
     async checkCustomerExists(customerId) {
-        const [customer] = await db.select().from(customers).where(eq(customers.customerId, customerId));
-        if (!customer) {
+        const [existingCustomer] = await db.select().from(customers).where(eq(customers.customerId, customerId));
+        if (!existingCustomer) {
             throw new Error(msg.CUSTOMER_NOT_FOUND);
         }
-        return customer;
+        return existingCustomer;
     }
 
     async checkEmailExists(email, customerId = null) {
@@ -58,10 +58,13 @@ export default class CustomerValidator {
             ? sql`${customers.customerId} != ${customerId} AND ${customers.email} = ${email}`
             : sql`${customers.email} = ${email}`;
 
-        const existingCustomer = await db.select().from(customers).where(query);
-        if (existingCustomer.length > 0) {
+        const [existingCustomer] = await db.select().from(customers).where(query);
+
+        if (existingCustomer) {
             throw new Error(msg.EMAIL_EXISTS);
         }
+
+        return existingCustomer;
     }
 
     async checkPhoneExists(phone, customerId = null) {
@@ -69,10 +72,12 @@ export default class CustomerValidator {
             ? sql`${customers.customerId} != ${customerId} AND ${customers.phone} = ${phone}`
             : sql`${customers.phone} = ${phone}`;
 
-        const existingCustomer = await db.select().from(customers).where(query);
-        if (existingCustomer.length > 0) {
+        const [existingCustomer] = await db.select().from(customers).where(query);
+        if (existingCustomer) {
             throw new Error(msg.PHONE_EXISTS);
         }
+
+        return existingCustomer;
     }
 
     async checkCINExists(CIN, customerId = null) {

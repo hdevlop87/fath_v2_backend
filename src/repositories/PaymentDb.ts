@@ -1,8 +1,8 @@
-import { payments, sales } from '../../../db/schema';
+import { payments, sales } from '../db/schema';
 import { eq, sql, and } from "drizzle-orm";
-import { msg } from '../../../lib/constants'
-import { db } from '../../../db/index';
-import fileDb from '../../storage/fileController/fileDb';
+import { msg } from '../lib/constants'
+import { db } from '../db/index';
+import fileDb from './fileDb';
 
 const paymentDb = {
 

@@ -1,5 +1,5 @@
 
-export const msg:any = {
+export const msg: any = {
   PASSWORD_UPDATE_REQUIRED: 'Please update your password to continue.',
   PASSWORD_CHANGED_SUCCESS: 'Password changed successfully.',
   USERS_RETRIEVED_SUCCESS: 'Users retrieved successfully.',
@@ -176,7 +176,9 @@ export const msg:any = {
   APP_INIT_FAILED: 'App initialization failed',
 
   AGREEMENT_EMAIL_SUCCESS: 'The agreement document has been sent successfully',
-AGREEMENT_DOWNLOAD_SUCCESS: 'The agreement document has been successfully downloaded.'
+  AGREEMENT_DOWNLOAD_SUCCESS: 'The agreement document has been successfully downloaded.',
+  AGREEMENT_DELETED_SUCCESS: 'Agreement deleted successfully',
+  AGREEMENTS_DELETED_SUCCESS: 'All agreements for the sale deleted successfully',
 };
 
 

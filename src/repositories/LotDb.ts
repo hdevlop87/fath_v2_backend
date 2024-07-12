@@ -1,7 +1,7 @@
-import { msg } from '../../../lib/constants'
-import { lots, sales, customers } from '../../../db/schema';
+import { msg } from '../lib/constants'
+import { lots, sales, customers } from '../db/schema';
 import { eq, sql } from "drizzle-orm";
-import { db } from '../../../db/index';
+import { db } from '../db/index';
 
 const lotDb = {
 

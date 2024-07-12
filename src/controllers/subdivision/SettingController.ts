@@ -1,9 +1,9 @@
-import { sendSuccess, sendError } from '../../../services/responseHandler';
-import asyncHandler from '../../../lib/asyncHandler';
-import { settings } from '../../../db/schema';
-import { msg } from '../../../lib/constants';
-import { db } from '../../../db/index';
+import { sendSuccess, sendError } from '../../services/responseHandler';
+import asyncHandler from '../../lib/asyncHandler';
+import { settings } from '../../db/schema';
+import { msg } from '../../lib/constants';
 import { eq, sql } from "drizzle-orm";
+import { db } from '../../db/index';
 
 const SettingController = {
 

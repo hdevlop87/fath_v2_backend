@@ -29,24 +29,6 @@ export default class PaymentValidator {
         PaymentValidator.instance = this;
     }
 
-    isReceiptProvided(receipt) {
-        return receipt !== undefined && receipt.length >= 1;
-    }
-
-    async checkReceiptUnique(receipt, paymentId = null) {
-        if (!receipt) {
-            return; 
-        }
-        const query = paymentId
-            ? sql`${payments.paymentId} != ${paymentId} AND ${payments.receipt} = ${receipt}`
-            : sql`${payments.receipt} = ${receipt}`;
-
-        const existingPayment = await db.select().from(payments).where(query);
-        if (existingPayment.length > 0) {
-            throw new Error(msg.PAYMENT_EXISTS);
-        }
-    }
-
     async validatePaymentSchema(data) {
         try {
             await this.paymentSchema.validateAsync(data);
@@ -59,6 +41,23 @@ export default class PaymentValidator {
             }
         }
     }
+
+    isReceiptProvided(receipt) {
+        return receipt !== undefined && receipt.length >= 1;
+    }
+
+    async checkReceiptUnique(receipt, paymentId = null) {
+        const query = paymentId
+            ? sql`${payments.paymentId} != ${paymentId} AND ${payments.receipt} = ${receipt}`
+            : sql`${payments.receipt} = ${receipt}`;
+
+        const existingPayment = await db.select().from(payments).where(query);
+        if (existingPayment.length > 0) {
+            throw new Error(msg.PAYMENT_EXISTS);
+        }
+    }
+
+
 
     async checkPaymentExists(paymentId) {
         const [payment] = await db.select().from(payments).where(eq(payments.paymentId, paymentId));

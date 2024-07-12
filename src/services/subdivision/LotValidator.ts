@@ -58,11 +58,13 @@ export default class LotValidator {
             ? sql`${lots.lotId} != ${lotId} AND ${lots.lotRef} = ${lotRef}`
             : sql`${lots.lotRef} = ${lotRef}`;
 
-        const existingLot = await db.select().from(lots).where(query);
-        if (existingLot.length > 0) {
+        const [existingLot] = await db.select().from(lots).where(query);
+        if (existingLot) {
             throw new Error(msg.LOT_EXISTS);
         }
-    }
+        
+        existingLot
+    } 
 
     async checkLotAvailability(lotId) {
         const [{ status }] = await db.select({ status: lots.status }).from(lots).where(eq(lots.lotId, lotId));

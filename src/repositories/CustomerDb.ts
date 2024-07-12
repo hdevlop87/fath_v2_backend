@@ -1,6 +1,6 @@
-import { db } from '../../../db/index';
+import { db } from '../db/index';
 import { eq, sql } from "drizzle-orm";
-import { customers, lots, sales } from '../../../db/schema';
+import { customers, lots, sales } from '../db/schema';
 
 const customerDb = {
     findAllCustomers: async () => {

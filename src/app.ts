@@ -8,6 +8,7 @@ const app = express();
 
 const allowedOrigins = [
     'http://38.242.196.111:3000',
+    'http://localhost:5000',
     'http://localhost:3000',
     'http://obadis.ma',
     'https://obadis.ma'

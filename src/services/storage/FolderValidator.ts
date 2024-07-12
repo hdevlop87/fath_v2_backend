@@ -2,7 +2,7 @@ import { msg } from '../../lib/constants';
 import { sql, eq } from "drizzle-orm";
 import { folders } from '../../db/schema';
 import { db } from '../../db/index';
-import folderDb from '../../controllers/storage/folderController/folderDb';
+import folderDb from '../../repositories/folderDb';
 import Joi from 'joi';
 import fs from 'fs/promises';
 import path from 'path';

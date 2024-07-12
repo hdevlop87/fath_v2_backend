@@ -1,9 +1,9 @@
-import { sales, payments, lots, customers } from '../../../db/schema';
+import { sales, payments, lots, customers } from '../db/schema';
 import { eq, sql, and } from "drizzle-orm";
-import lotDb from './../LotController/LotDb';
-import { msg } from '../../../lib/constants'
-import { db } from '../../../db/index';
-import paymentDb from '../PaymentController/PaymentDb'
+import lotDb from './LotDb';
+import { msg } from '../lib/constants'
+import { db } from '../db/index';
+import paymentDb from './PaymentDb'
 
 const saleDb = {
 

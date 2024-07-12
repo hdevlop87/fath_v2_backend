@@ -1,6 +1,6 @@
-import { files } from "../../../db/schema";
+import { files } from "../db/schema";
 import { eq,  desc,  isNull } from "drizzle-orm";
-import { db } from "../../../db/index";
+import { db } from "../db/index";
 import { promises as fs } from 'fs';
 
 

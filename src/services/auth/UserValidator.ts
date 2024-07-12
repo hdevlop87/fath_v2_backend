@@ -3,7 +3,7 @@ import { db } from '../../db/index';
 import { users } from '../../db/schema';
 import Joi from 'joi';
 import { msg } from '../../lib/constants';
-import UserDb from '../../controllers/auth/UserController/UserDb'
+import UserDb from '../../repositories/UserDb'
 
 export default class UserValidator {
     static instance = null;
@@ -44,22 +44,23 @@ export default class UserValidator {
     }
 
     async checkIsAdmin(userId) {
-        await this.checkUserHasRole(userId, 'admin');
+        await this.checkUserHasRole(userId, ['admin']);
     }
 
     async checkIsGuest(userId) {
-        await this.checkUserHasRole(userId, 'guest');
+        await this.checkUserHasRole(userId, ['guest']);
     }
 
-    async checkUserHasRole(userId, roleName) {
-        const role:any = await UserDb.findRoleById(userId);
+    async checkUserHasRole(userId, roleNames) {
+        const role = await UserDb.findRoleById(userId);
         if (!role) {
             throw new Error(msg.ACCESS_DENIED);
         }
-        const hasRole = role?.roleName?.toLowerCase() === roleName.toLowerCase();
+        const hasRole = roleNames.some(roleName => role.roleName.toLowerCase() === roleName.toLowerCase());
         if (!hasRole) {
             throw new Error(msg.ACCESS_DENIED);
         }
+        return true;
     }
 
     async checkUserHasPermission(userId, permissionName) {

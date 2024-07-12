@@ -1,11 +1,11 @@
-import { sendSuccess } from '../../../services/responseHandler';
-import FolderValidator from '../../../services/storage/FolderValidator';
-import asyncHandler from '../../../lib/asyncHandler';
-import { msg } from '../../../lib/constants';
-import { hashPassword } from '../../../lib/utils';
-import StorageManager from '../../../services/storage/StorageManager';
-import folderDb from './folderDb';
-import fileDb from '../fileController/fileDb'
+import { sendSuccess } from '../../services/responseHandler';
+import FolderValidator from '../../services/storage/FolderValidator';
+import asyncHandler from '../../lib/asyncHandler';
+import { msg } from '../../lib/constants';
+import { hashPassword } from '../../lib/utils';
+import StorageManager from '../../services/storage/StorageManager';
+import folderDb from '../../repositories/folderDb';
+import fileDb from '../../repositories/fileDb'
 import fs from 'fs/promises';
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';

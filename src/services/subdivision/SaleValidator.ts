@@ -3,7 +3,7 @@ import { db } from '../../db/index';
 import { sales } from '../../db/schema';
 import Joi from 'joi';
 import { msg } from '../../lib/constants';
-import saleDb from '../../controllers/subdivision/SaleController/SaleDb';
+import saleDb from '../../repositories/SaleDb';
 
 export default class SaleValidator {
 
@@ -45,7 +45,6 @@ export default class SaleValidator {
 
     async checkSaleExists(saleId) {
         const sale = await saleDb.findSaleById(saleId);
-
         if (!sale) {
             throw new Error(msg.SALE_NOT_FOUND);
         }
@@ -53,9 +52,6 @@ export default class SaleValidator {
     }
 
     async checkLotExistsInSales(lotId, saleId = null) {
-        if (!lotId) { 
-            throw new Error(msg.LOT_NOT_FOUND);
-        }
         const query = saleId
             ? sql`${sales.saleId} != ${saleId} AND ${sales.lotId} = ${lotId}`
             : sql`${sales.lotId} = ${lotId}`;

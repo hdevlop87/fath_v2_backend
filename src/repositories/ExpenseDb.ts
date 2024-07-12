@@ -1,7 +1,7 @@
-import { expenses, } from '../../../db/schema';
+import { expenses, } from '../db/schema';
 import { eq, sql } from "drizzle-orm";
-import { db } from '../../../db/index';
-import fileDb from '../../storage/fileController/fileDb';
+import { db } from '../db/index';
+import fileDb from './fileDb';
 
 const expenseDb = {
 

@@ -29,24 +29,6 @@ export default class ExpenseValidator {
         ExpenseValidator.instance = this;
     }
 
-    isReceiptProvided(receipt) {
-        return receipt !== undefined && receipt.length >= 1;
-    }
-
-    async checkReceiptUnique(receipt, expenseId = null) {
-        if (!receipt) {
-            return; 
-        }
-        const query = expenseId
-            ? sql`${expenses.expenseId} != ${expenseId} AND ${expenses.receipt} = ${receipt}`
-            : sql`${expenses.receipt} = ${receipt}`;
-
-        const existingExpense = await db.select().from(expenses).where(query);
-        if (existingExpense.length > 0) {
-            throw new Error(msg.PAYMENT_EXISTS);
-        }
-    }
-
     async validateExpenseSchema(data) {
         try {
             await this.expenseSchema.validateAsync(data);
@@ -58,7 +40,25 @@ export default class ExpenseValidator {
                 throw error;
             }
         }
+    } 
+
+    isReceiptProvided(receipt) {
+        return receipt !== undefined && receipt.length >= 1;
     }
+
+    async checkReceiptUnique(receipt, expenseId = null) {
+        const query = expenseId
+            ? sql`${expenses.expenseId} != ${expenseId} AND ${expenses.receipt} = ${receipt}`
+            : sql`${expenses.receipt} = ${receipt}`;
+
+        const [existingExpense] = await db.select().from(expenses).where(query);
+        if (existingExpense) {
+            throw new Error(msg.PAYMENT_EXISTS);
+        }
+
+        return existingExpense
+    }
+
 
     async checkExpenseExists(expenseId) {
         const [expense] = await db.select().from(expenses).where(eq(expenses.expenseId, expenseId));

@@ -1,5 +1,4 @@
-
-import RolePermissionController from '../controllers/auth/PermissionController/RolePermissionController';
+import RolePermissionController from '../controllers/auth/RolePermissionController';
 import PermissionController from '../controllers/auth/PermissionController';
 import UserController from '../controllers/auth/UserController';
 import RoleController from '../controllers/auth/RoleController';
@@ -13,7 +12,7 @@ import ExpenseController from '../controllers/subdivision/ExpenseController';
 import DocumentController from '../controllers/subdivision/documentController';
 import SettingController from '../controllers/subdivision/SettingController';
 
-const adminRoutes = [
+export const adminOnlyRoutes = [
     { path: 'users/changePassword/:id', method: 'post', handler: UserController.updatePassUser },
     { path: 'users', method: 'delete', handler: UserController.deleteAllUsers },
     { path: 'users', method: 'post', handler: UserController.createUser },
@@ -39,7 +38,11 @@ const adminRoutes = [
     { path: 'rolePermissions/:id', method: 'get', handler: RolePermissionController.getPermissionsRole },
     { path: 'rolePermissions', method: 'post', handler: RolePermissionController.assignPermissionToRole },
     { path: 'rolePermissions', method: 'delete', handler: RolePermissionController.removePermissionFromRole },
-    
+
+    { path: 'settings/', method: 'post', handler: SettingController.getSettings },
+];
+
+export const adminAndEditorRoutes = [
     { path: 'files/deleteMulti', method: 'post', handler: FileController.deleteMultiFiles },
     { path: 'files/byPath', method: 'delete', handler: FileController.deleteFileByPath },
     { path: 'files/', method: 'delete', handler: FileController.deleteAllFiles },
@@ -53,14 +56,12 @@ const adminRoutes = [
     { path: 'folders/:id', method: 'patch', handler: FolderController.updateFolder },
     { path: 'folders/:id', method: 'delete', handler: FolderController.deleteFolderById },
 
-    { path: 'lots/initialize', method: 'post', handler: LotController.initializeLots },
     { path: 'lots/bulk-add-csv', method: 'post', handler: LotController.bulkAddLotsFromCSV },
     { path: 'lots/', method: 'delete', handler: LotController.deleteAllLots },
     { path: 'lots/', method: 'post', handler: LotController.createLot },
     { path: 'lots/:id', method: 'patch', handler: LotController.updateLot },
     { path: 'lots/:id', method: 'delete', handler: LotController.deleteLotById },
 
-    { path: 'customers/initialize', method: 'post', handler: CustomerController.initializeCustomers },
     { path: 'customers/bulk-add-csv', method: 'post', handler: CustomerController.bulkAddCustomersFromCSV },
     { path: 'customers/', method: 'delete', handler: CustomerController.deleteAllCustomers },
     { path: 'customers/', method: 'post', handler: CustomerController.createCustomer },
@@ -69,7 +70,7 @@ const adminRoutes = [
 
     { path: 'sales/agreement/email/:id', method: 'post', handler: DocumentController.sendAgreementByMail },
     { path: 'sales/agreement/:id', method: 'get', handler: DocumentController.downloadAgreement },
-    { path: 'sales/initialize', method: 'post', handler: SaleController.initializeSales },
+
     { path: 'sales/bulk-add-csv', method: 'post', handler: SaleController.bulkAddSalesFromCSV },
     { path: 'sales/wizard', method: 'post', handler: SaleController.createWizard },
     { path: 'sales/', method: 'delete', handler: SaleController.deleteAllSales },
@@ -77,23 +78,17 @@ const adminRoutes = [
     { path: 'sales/:id', method: 'patch', handler: SaleController.updateSale },
     { path: 'sales/:id', method: 'delete', handler: SaleController.deleteSaleById },
 
-    { path: 'payments/initialize', method: 'post', handler: PaymentController.initializePayments },
     { path: 'payments/bulk-add-csv', method: 'post', handler: PaymentController.bulkAddPaymentsFromCSV },
     { path: 'payments/', method: 'delete', handler: PaymentController.deleteAllPayments },
     { path: 'payments/', method: 'post', handler: PaymentController.createPayment },
     { path: 'payments/:id', method: 'patch', handler: PaymentController.updatePayment },
     { path: 'payments/:id', method: 'delete', handler: PaymentController.deletePaymentById },
 
-    { path: 'expenses/initialize', method: 'post', handler: ExpenseController.initializeExpenses },
     { path: 'expenses/bulk-add-csv', method: 'post', handler: ExpenseController.bulkAddExpensesFromCSV },
     { path: 'expenses/', method: 'delete', handler: ExpenseController.deleteAllExpenses },
     { path: 'expenses/', method: 'post', handler: ExpenseController.createExpense },
     { path: 'expenses/:id', method: 'patch', handler: ExpenseController.updateExpense },
     { path: 'expenses/:id', method: 'delete', handler: ExpenseController.deleteExpenseById },
 
-
-    { path: 'settings/', method: 'post', handler: SettingController.getSettings },
 ];
 
-
-export default adminRoutes;

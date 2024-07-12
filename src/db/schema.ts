@@ -125,6 +125,14 @@ export const expenses = pgTable("expenses", {
     createdAt: timestamp('created_at').defaultNow(),
     updatedAt: timestamp('updated_at').defaultNow(),
 });
+
+export const agreements = pgTable("agreements", {
+    agreementId: text("agreementId").notNull().primaryKey(),
+    saleId: integer("saleId").notNull().references(() => sales.saleId, { onDelete: 'cascade' }),
+    fileId: text("fileId").notNull().references(() => files.id, { onDelete: 'cascade' }),
+    createdAt: timestamp('created_at').defaultNow(),
+    updatedAt: timestamp('updated_at').defaultNow(),
+});
 //============================================================================//
 
 export const files = pgTable("files", {

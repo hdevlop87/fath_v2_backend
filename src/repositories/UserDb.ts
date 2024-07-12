@@ -1,6 +1,6 @@
-import { users, roles, permissions, rolesPermissions } from '../../../db/schema';
+import { users, roles, permissions, rolesPermissions } from '../db/schema';
 import { eq } from 'drizzle-orm';
-import { db } from '../../../db/index';
+import { db } from '../db/index';
 
 const UserDb = {
 

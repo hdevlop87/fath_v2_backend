@@ -1,8 +1,7 @@
 import express from 'express';
+import { isAuth, isAdmin, hasRole } from '../middleware';
 
-import { isAuth, isAdmin } from '../middleware'
-
-import adminRoutes from './adminRoutes';
+import {adminOnlyRoutes,adminAndEditorRoutes} from './adminRoutes';
 import authRoutes from './authRoutes';
 import publicRoutes from './publicRoutes';
 
@@ -19,8 +18,9 @@ const applyRouteGroup = (routes, middlewares = []) => {
 };
 
 applyRouteGroup(publicRoutes);
-applyRouteGroup(authRoutes,[isAuth]);
-applyRouteGroup(adminRoutes,[isAdmin]);
+applyRouteGroup(authRoutes, [isAuth]);
+applyRouteGroup(adminOnlyRoutes, [isAdmin]);
+applyRouteGroup(adminAndEditorRoutes, [hasRole('Admin', 'Editor')]);
 
 
 export default router;

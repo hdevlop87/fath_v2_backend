@@ -1,14 +1,14 @@
-import PaymentValidator from '../../../services/subdivision/PaymentValidator';
-import { sendSuccess, sendError } from '../../../services/responseHandler';
-import SaleValidator from '../../../services/subdivision/SaleValidator';
-import asyncHandler from '../../../lib/asyncHandler'
-import saleDb from '../SaleController/SaleDb';
-import fileDb from '../../storage/fileController/fileDb';
-import { parseCSVFile } from '../../../lib/utils';
-import { msg } from '../../../lib/constants';
-import paymentDb from './PaymentDb';
-import path from 'path';
+import PaymentValidator from '../../services/subdivision/PaymentValidator';
+import { sendSuccess, sendError } from '../../services/responseHandler';
+import SaleValidator from '../../services/subdivision/SaleValidator';
+import paymentDb from '../../repositories/PaymentDb';
+import asyncHandler from '../../lib/asyncHandler'
+import saleDb from '../../repositories/SaleDb';
+import fileDb from '../../repositories/fileDb';
+import { parseCSVFile } from '../../lib/utils';
 import { promises as fsPromises } from 'fs';
+import { msg } from '../../lib/constants';
+import path from 'path';
 import fs from 'fs';
 
 const paymentValidator = new PaymentValidator();

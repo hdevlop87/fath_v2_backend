@@ -1,6 +1,6 @@
-import { folders, files } from "../../../db/schema";
+import { folders, files } from "../db/schema";
 import { eq, sql, like,inArray } from "drizzle-orm";
-import { db } from "../../../db/index";
+import { db } from "../db/index";
 import { promises as fs } from 'fs';
 
 const FolderDb = {
@@ -117,6 +117,13 @@ const FolderDb = {
 
    //=========================================================//
 
+   getFolderPath: async (id) => {
+      const folder = await FolderDb.findFolderById(id);
+      return folder ? folder.path : null;
+   },
+
+   //=========================================================//
+
    deleteFolderByPath: async (path) => {
       const [deletedFolder] = await db
          .delete(folders)
@@ -163,13 +170,12 @@ const FolderDb = {
    //========================================================//
 
    folderExists: async (folderName, parentId = null) => {
-      let conditions =
-         parentId === null
+      let conditions =  parentId === null
             ? sql`(${folders.name} = ${folderName} AND ${folders.parentId} IS NULL)`
             : sql`(${folders.name} = ${folderName} AND ${folders.parentId} = ${parentId})`;
 
-      const existingFolder = await db.select().from(folders).where(conditions);
-      return existingFolder.length > 0;
+      const [existingFolder] = await db.select().from(folders).where(conditions);
+      return !!existingFolder;
    },
 
    folderExistsByPath: async (path) => {

@@ -2,8 +2,8 @@ import { msg } from '../../lib/constants';
 import { sql, eq } from "drizzle-orm";
 import { files } from '../../db/schema';
 import { db } from '../../db/index';
-import fileDb from '../../controllers/storage/fileController/fileDb'
-import folderDb from '../../controllers/storage/folderController/folderDb'
+import fileDb from '../../repositories/fileDb';
+import folderDb from '../../repositories/folderDb';
 import Joi from 'joi';
 
 export default class FileValidator {
