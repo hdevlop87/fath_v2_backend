@@ -2,7 +2,7 @@ import { eq, sql, and } from "drizzle-orm";
 import { db } from '../../db/index';
 import { sales } from '../../db/schema';
 import Joi from 'joi';
-import { msg } from '../../lib/constants';
+import { msg } from '../../lib/constants/constants';
 import saleDb from '../../repositories/SaleDb';
 
 export default class SaleValidator {

@@ -1,28 +1,26 @@
 import { eq } from "drizzle-orm";
-import { sendSuccess } from '../../services/responseHandler';
-import RoleValidator from '../../services/auth/RoleValidator';
-import UserValidator from '../../services/auth/UserValidator'
-import asyncHandler from '../../lib/asyncHandler'
-import { hashPassword } from '../../lib/utils'
-import { msg } from '../../lib/constants';
+import { sendSuccess, withErrorHandler } from '../../services/responseHandler';
+import RoleValidator from '../../Validators/auth/RoleValidator';
+import UserValidator from '../../Validators/auth/UserValidator';
+import { hashPassword } from '../../lib/utils';
+import { msg } from '../../lib/constants/constants';
 import { users } from '../../db/schema';
-import { db } from '../../db/index'
+import { db } from '../../db/index';
 import UserDb from '../../repositories/UserDb';
-import {delay} from '../../lib/utils'
 import { v4 as uuidv4 } from 'uuid';
 
-const roleValidator = new RoleValidator()
-const userValidator = new UserValidator()
+const roleValidator = new RoleValidator();
+const userValidator = new UserValidator();
 
 const UserController = {
 
-   getAllUsers: asyncHandler(async (req, res) => {
+   getAllUsers: withErrorHandler(async (req, res) => {
       const allUsers = await UserDb.findAllUsers();
 
       const usersRolePermissions = await Promise.all(allUsers.map(async user => {
          const userRole = await UserDb.findRoleById(user.id);
          const userPermissions = await UserDb.findPermissionsById(user.id);
-         const { password, ...cleanUser } = user
+         const { password, ...cleanUser } = user;
          return {
             ...cleanUser,
             role: userRole.roleName,
@@ -30,18 +28,16 @@ const UserController = {
          };
       }));
 
-      sendSuccess(res, usersRolePermissions, msg.USERS_RETRIEVED_SUCCESS);
+      return sendSuccess(res, usersRolePermissions, msg.USERS_RETRIEVED_SUCCESS);
    }),
 
-   deleteAllUsers: asyncHandler(async (req, res) => {
+   deleteAllUsers: withErrorHandler(async (req, res) => {
       const deletedUsers = await UserDb.deleteAllUsers();
-      sendSuccess(res, deletedUsers, msg.USERS_DELETED_SUCCESS);
+      return sendSuccess(res, deletedUsers, msg.USERS_DELETED_SUCCESS);
    }),
 
-   //=============== one user actions =========================//
-
-   createUser: asyncHandler(async (req, res) => {
-      const { name, username, email, password, roleId, status,image } = req.body;
+   createUser: withErrorHandler(async (req, res) => {
+      const { name, username, email, password, roleId, status, image } = req.body;
 
       await userValidator.validateUserSchema(req.body);
       await userValidator.checkUsernameExists(username);
@@ -59,16 +55,13 @@ const UserController = {
          status,
          roleId,
          image
-      }
+      };
 
       const [newUser] = await UserDb.insertUser(userDetails);
-
-      await delay(2000);
-
-      sendSuccess(res, newUser, msg.USER_CREATED_SUCCESS);
+      return sendSuccess(res, newUser, msg.USER_CREATED_SUCCESS);
    }),
 
-   updateUser: asyncHandler(async (req, res) => {
+   updateUser: withErrorHandler(async (req, res) => {
       const userId = req.params.id;
       const updateFields = req.body;
 
@@ -92,12 +85,12 @@ const UserController = {
 
       updateFields.updatedAt = new Date();
 
-      const [updatedUser] = await UserDb.updateUserById(userId, updateFields)
+      const [updatedUser] = await UserDb.updateUserById(userId, updateFields);
 
-      sendSuccess(res, updatedUser, msg.USER_UPDATED_SUCCESS);
+      return sendSuccess(res, updatedUser, msg.USER_UPDATED_SUCCESS);
    }),
 
-   updatePassUser: asyncHandler(async (req, res) => {
+   updatePassUser: withErrorHandler(async (req, res) => {
       const userId = req.params.id;
       const { newPassword } = req.body;
       const existingUser = await userValidator.checkUserExists(userId);
@@ -107,70 +100,74 @@ const UserController = {
          .set({ password: hashedPassword })
          .where(eq(users.id, existingUser?.id));
 
-      sendSuccess(res, updatedUser, msg.USER_DELETED_SUCCESS);
+      return sendSuccess(res, updatedUser, msg.USER_UPDATED_SUCCESS);
    }),
 
-   updateRoleUser: asyncHandler(async (req, res) => {
+   updateRoleUser: withErrorHandler(async (req, res) => {
       const { userId, roleId } = req.body;
       await userValidator.checkUserExists(userId);
       await roleValidator.checkRoleExists(roleId);
 
       const [updatedUser] = await UserDb.updateUserById(userId, { roleId });
-      sendSuccess(res, updatedUser, msg.ROLE_ASSIGNED_TO_USER_SUCCESS);
+      return sendSuccess(res, updatedUser, msg.ROLE_ASSIGNED_TO_USER_SUCCESS);
    }),
 
-   deleteUserById: asyncHandler(async (req, res) => {
+   deleteUserById: withErrorHandler(async (req, res) => {
       const userId = req.params.id;
-      await userValidator.checkUserExists(userId)
+      await userValidator.checkUserExists(userId);
       const [deletedUser] = await UserDb.deleteUserById(userId);
-      await delay(2000);
-      sendSuccess(res, deletedUser, msg.USER_DELETED_SUCCESS);
+      return sendSuccess(res, deletedUser, msg.USER_DELETED_SUCCESS);
    }),
 
-   getUserById: asyncHandler(async (req, res) => {
+   getUserById: withErrorHandler(async (req, res) => {
       const userId = req.params.id;
-      const user = await userValidator.checkUserExists(userId)
+      const user = await userValidator.checkUserExists(userId);
       const role = await UserDb.findRoleById(userId);
       const permissions = await UserDb.findPermissionsById(userId);
 
-      const { roleId, password, ...cleanUser } = user
+      const { roleId, password, ...cleanUser } = user;
 
       const data = {
          ...cleanUser,
          role,
          permissions
-      }
-      sendSuccess(res, data, msg.USER_RETRIEVED_SUCCESS);
+      };
+      return sendSuccess(res, data, msg.USER_RETRIEVED_SUCCESS);
    }),
 
-   getUserByEmail: asyncHandler(async (req, res) => {
+   getUserByEmail: withErrorHandler(async (req, res) => {
       const email = req.params.email;
       const [user] = await UserDb.findUserByEmail(email);
-      await userValidator.checkUserExists(user.id)
-      sendSuccess(res, user, msg.USER_RETRIEVED_SUCCESS);
+      await userValidator.checkUserExists(user.id);
+      return sendSuccess(res, user, msg.USER_RETRIEVED_SUCCESS);
    }),
 
-   getUserByUsername: asyncHandler(async (req, res) => {
+   getUserByUsername: withErrorHandler(async (req, res) => {
       const username = req.params.username;
       const [user] = await UserDb.findUserByUsername(username);
-      await userValidator.checkUserExists(user.id)
-      sendSuccess(res, user, msg.USER_RETRIEVED_SUCCESS);
+      await userValidator.checkUserExists(user.id);
+      return sendSuccess(res, user, msg.USER_RETRIEVED_SUCCESS);
    }),
 
-   getUserRole: asyncHandler(async (req, res) => {
+   getUserRole: withErrorHandler(async (req, res) => {
       const userId = req.params.id;
-      await userValidator.checkUserExists(userId)
+      await userValidator.checkUserExists(userId);
       const role = await UserDb.findRoleById(userId);
-      sendSuccess(res, role, msg.USER_ROLES_RETRIEVED_SUCCESS);
+      return sendSuccess(res, role, msg.USER_ROLES_RETRIEVED_SUCCESS);
    }),
 
-   getUserPermissions: asyncHandler(async (req, res) => {
+   getUserPermissions: withErrorHandler(async (req, res) => {
       const userId = req.params.id;
       await userValidator.checkUserExists(userId);
       const permissions = await UserDb.findPermissionsById(userId);
-      sendSuccess(res, permissions, msg.USER_PERMISSIONS_RETRIEVED_SUCCESS);
+      return sendSuccess(res, permissions, msg.USER_PERMISSIONS_RETRIEVED_SUCCESS);
    }),
+
+   bulkAddUsers: withErrorHandler(async (req, res) => {
+
+   }),
+
+   
 };
 
-
-export default UserController
+export default UserController;

@@ -1,10 +1,9 @@
-import { sendSuccess, sendError } from '../../services/responseHandler';
+import { sendSuccess, sendError, withErrorHandler } from '../../services/responseHandler';
 import { hashPassword, comparePassword } from '../../lib/utils';
-import UserValidator from '../../services/auth/UserValidator';
-import RoleValidator from '../../services/auth/RoleValidator';
-import TokenService from '../../services/auth/TokenService';
-import asyncHandler from '../../lib/asyncHandler';
-import { msg } from '../../lib/constants';
+import UserValidator from '../../Validators/auth/UserValidator';
+import RoleValidator from '../../Validators/auth/RoleValidator';
+import TokenService from '../../services/TokenService';
+import { msg } from '../../lib/constants/constants';
 import UserDb from '../../repositories/UserDb';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -13,9 +12,9 @@ const userValidator = new UserValidator();
 const roleValidator = new RoleValidator();
 
 const AuthController = {
-
-    loginUser: asyncHandler(async (req, res) => {
-        let { username, password } = req.body;
+    
+    loginUser: withErrorHandler(async (req, res) => {
+        const { username, password } = req.body;
 
         if (!username || !password) {
             return sendError(res, msg.FIELDS_MISSING, 400);
@@ -37,16 +36,16 @@ const AuthController = {
         const data = {
             accessToken,
             refreshToken,
-            accessTokenExpiresAt: AuthController.getAccessTokenExpire(),
-            refreshTokenExpiresAt: AuthController.getRefreshTokenExpire()
-        }
+            accessTokenExpiresAt: tokenService.getAccessTokenExpire(),
+            refreshTokenExpiresAt: tokenService.getRefreshTokenExpire()
+        };
 
         AuthController.sendCookies(res, refreshToken);
-        sendSuccess(res, data, msg.USER_LOGIN_SUCCESS);
+        return sendSuccess(res, data, msg.USER_LOGIN_SUCCESS);
     }),
 
-    registerUser: asyncHandler(async (req, res) => {
-        const { name, username, phone, email, password, roleId,status } = req.body;
+    registerUser: withErrorHandler(async (req, res) => {
+        const { name, username, phone, email, password, roleId, status } = req.body;
 
         await userValidator.validateUserSchema(req.body);
         await userValidator.checkUsernameExists(username);
@@ -63,69 +62,66 @@ const AuthController = {
             password: hashedPassword,
             status,
             roleId,
-        }
-        
+        };
+
         const tokenPayload = { userId: userDetails.id };
         const [newUser] = await UserDb.insertUser(userDetails);
         const accessToken = tokenService.generateAccessToken(tokenPayload);
         const refreshToken = tokenService.generateRefreshToken(tokenPayload);
-        tokenService.storeRefrechToken(newUser.id, refreshToken);
+        await tokenService.storeRefrechToken(newUser.id, refreshToken);
 
         const data = {
             accessToken,
             refreshToken,
-            accessTokenExpiresAt: AuthController.getAccessTokenExpire(),
-            refreshTokenExpiresAt: AuthController.getRefreshTokenExpire()
-        }
+            accessTokenExpiresAt: tokenService.getAccessTokenExpire(),
+            refreshTokenExpiresAt: tokenService.getRefreshTokenExpire()
+        };
 
         AuthController.sendCookies(res, refreshToken);
-        sendSuccess(res, data, msg.USER_REGISTER_SUCCESS);
+        return sendSuccess(res, data, msg.USER_REGISTER_SUCCESS);
     }),
 
-    refreshToken: asyncHandler(async (req, res) => {
-
-        let { accessToken, refreshToken, userId } = await tokenService.refreshToken(req);
+    refreshToken: withErrorHandler(async (req, res) => {
+        const { accessToken, refreshToken, userId } = await tokenService.refreshToken(req);
 
         AuthController.sendCookies(res, refreshToken);
         await userValidator.checkUserExists(userId);
         const data = {
             accessToken,
             refreshToken,
-            accessTokenExpiresAt: AuthController.getAccessTokenExpire(),
-            refreshTokenExpiresAt: AuthController.getRefreshTokenExpire()
-        }
-        sendSuccess(res, data, msg.REFRESH_TOKEN_REFRESH_SUCCESS);
+            accessTokenExpiresAt: tokenService.getAccessTokenExpire(),
+            refreshTokenExpiresAt: tokenService.getRefreshTokenExpire()
+        };
+        return sendSuccess(res, data, msg.REFRESH_TOKEN_REFRESH_SUCCESS);
     }),
 
-    logoutUser: asyncHandler(async (req, res) => {
+    logoutUser: withErrorHandler(async (req, res) => {
         const userId = req.params.id;
-        await userValidator.checkUserExists(userId)
+        await userValidator.checkUserExists(userId);
         await tokenService.revokeToken(userId);
         AuthController.clearCookies(res);
-        sendSuccess(res, null, msg.USER_LOGOUT_SUCCESS);
+        return sendSuccess(res, null, msg.USER_LOGOUT_SUCCESS);
     }),
 
-    userProfile: asyncHandler(async (req, res) => {
+    userProfile: withErrorHandler(async (req, res) => {
         const user = await tokenService.getUserByAccessToken(req);
-        const {roleName} = await UserDb.findRoleById(user.id);
+        const { roleName } = await UserDb.findRoleById(user.id);
         const permissions = await UserDb.findPermissionsById(user.id);
-  
-        const { roleId, password, ...cleanUser } = user
-  
-        const data = {
-           ...cleanUser,
-           role:roleName,
-           permissions
-        }
-        sendSuccess(res, data, msg.USER_RETRIEVED_SUCCESS);
-    }),
 
+        const { roleId, password, ...cleanUser } = user;
+
+        const data = {
+            ...cleanUser,
+            role: roleName,
+            permissions
+        };
+        return sendSuccess(res, data, msg.USER_RETRIEVED_SUCCESS);
+    }),
 
     sendCookies: (res, token, options = {}) => {
-
-        const refreshTokenExpiresAt = AuthController.getRefreshTokenExpire();
+        const refreshTokenExpiresAt = tokenService.getRefreshTokenExpire();
         const nowInSeconds = Math.floor(Date.now() / 1000);
-        const maxAge = (refreshTokenExpiresAt - nowInSeconds) * 1000;
+        const maxAge = (refreshTokenExpiresAt - nowInSeconds);
 
         res.cookie('refreshToken', token, {
             httpOnly: true,
@@ -135,7 +131,7 @@ const AuthController = {
             ...options,
         });
 
-        res.cookie('refreshTokenExpiresAt', refreshTokenExpiresAt, {
+        res.cookie('refreshTokenExpiresAt', refreshTokenExpiresAt.toString(), {
             //secure: true,
             sameSite: 'Lax',
             maxAge,
@@ -158,17 +154,6 @@ const AuthController = {
         });
     },
 
-    getAccessTokenExpire: () => {
-        const expireDate = tokenService.getAccessTokenExpire();
-        return Math.floor(expireDate.getTime() / 1000);
-    },
-
-    getRefreshTokenExpire: () => {
-        const expireDate = tokenService.getRefreshTokenExpire();
-        return Math.floor(expireDate.getTime() / 1000);
-    },
-
-
-}
+};
 
 export default AuthController;

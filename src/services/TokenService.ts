@@ -1,9 +1,9 @@
-import UserValidator from './UserValidator'
-import { parseDuration } from '../../lib/utils'
-import { msg } from '../../lib/constants';
-import { tokens } from '../../db/schema';
+import UserValidator from '../Validators/auth/UserValidator'
+import { parseDuration } from '../lib/utils'
+import { msg } from '../lib/constants/constants';
+import { tokens } from '../db/schema';
 import { eq } from "drizzle-orm";
-import { db } from '../../db/index'
+import { db } from '../db/index'
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 import { v4 as uuidv4 } from 'uuid';
@@ -130,8 +130,8 @@ class TokenService {
     }
 
     public async storeRefrechToken(userId, refreshToken) {
-        const refreshExpires = this.getRefreshTokenExpire();
-
+        const refreshExpiresInSeconds = this.getRefreshTokenExpire();
+        const refreshExpires = new Date(refreshExpiresInSeconds * 1000);
         const tokenData = {
             id: uuidv4(),
             userId,
@@ -152,15 +152,15 @@ class TokenService {
     getAccessTokenExpire() {
         const currentTime = Date.now();
         const accessExpiresInMs = parseDuration(this.accessExpiresIn);
-        const accessExpiresAt = new Date(currentTime + accessExpiresInMs);
-        return accessExpiresAt;
+        const accessExpiresAt = new Date(currentTime + accessExpiresInMs);// Returns the expiration time as a Unix timestamp
+        return Math.floor(accessExpiresAt.getTime() / 1000);// Returns the expiration time as a Unix timestamp in seconds
     }
 
     getRefreshTokenExpire() {
         const currentTime = Date.now();
         const refreshExpiresInMs = parseDuration(this.refreshExpiresIn);
-        const refreshExpiresAt = new Date(currentTime + refreshExpiresInMs);
-        return refreshExpiresAt;
+        const refreshExpiresAt = new Date(currentTime + refreshExpiresInMs);// Returns the expiration time as a Unix timestamp
+        return Math.floor(refreshExpiresAt.getTime() / 1000);// Returns the expiration time as a Unix timestamp in seconds
     }
 
     static getInstance() {

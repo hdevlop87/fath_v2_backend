@@ -1,7 +1,7 @@
 import { sales, payments, lots, customers } from '../db/schema';
 import { eq, sql, and } from "drizzle-orm";
 import lotDb from './LotDb';
-import { msg } from '../lib/constants'
+import { msg } from '../lib/constants/constants'
 import { db } from '../db/index';
 import paymentDb from './PaymentDb'
 
@@ -132,8 +132,6 @@ const saleDb = {
         return updatedSale;
     },
 
-
-
     createSale: async (saleDetail) => {
         await saleDb.resetSequence();
         const [newSale] = await db.insert(sales).values(saleDetail).returning();
@@ -170,11 +168,11 @@ const saleDb = {
 
     getTotalPrice: async (saleId) => {
         const [{ totalPrice }] = await db.select({ totalPrice: sales.totalPrice }).from(sales).where(eq(sales.saleId, saleId));
-        return parseFloat(totalPrice)
+        return totalPrice
     },
 
-    getSalesCount:async()=>{
-        const [{ totalSalesCount }] = await db.select({totalSalesCount: sql`COUNT(*)`}).from(sales);
+    getSalesCount: async () => {
+        const [{ totalSalesCount }] = await db.select({ totalSalesCount: sql`COUNT(*)` }).from(sales);
         return Number(totalSalesCount)
     },
 
@@ -195,7 +193,7 @@ const saleDb = {
         return {
             balanceDue,
             paidPercentage,
-            totalVerifiedPayments
+            totalVerifiedPayments,
         }
     },
 

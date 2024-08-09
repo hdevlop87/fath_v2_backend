@@ -1,6 +1,6 @@
 import { payments, sales } from '../db/schema';
 import { eq, sql, and } from "drizzle-orm";
-import { msg } from '../lib/constants'
+import { msg } from '../lib/constants/constants'
 import { db } from '../db/index';
 import fileDb from './fileDb';
 
@@ -44,7 +44,7 @@ const paymentDb = {
         const [deletedPayment] = await db.delete(payments)
             .where(eq(payments.paymentId, paymentId))
             .returning();
-        await paymentDb.resetSequence()
+        await paymentDb.resetSequence();
         return deletedPayment;
     },
 

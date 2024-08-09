@@ -1,4 +1,4 @@
-import { msg } from '../../lib/constants';
+import { msg } from '../../lib/constants/constants';
 import { sql, eq } from "drizzle-orm";
 import { folders } from '../../db/schema';
 import { db } from '../../db/index';

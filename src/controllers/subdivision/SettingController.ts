@@ -1,17 +1,17 @@
-import { sendSuccess, sendError } from '../../services/responseHandler';
-import asyncHandler from '../../lib/asyncHandler';
+import { sendSuccess, sendError, withErrorHandler } from '../../services/responseHandler';
+
 import { settings } from '../../db/schema';
-import { msg } from '../../lib/constants';
+import { msg } from '../../lib/constants/constants';
 import { eq, sql } from "drizzle-orm";
 import { db } from '../../db/index';
 
 const SettingController = {
 
-    getSettings: asyncHandler(async (req, res) => {
+    getSettings: withErrorHandler(async (req, res) => {
 
         const [data] = await db.select().from(settings).where(eq(settings.id, 1));
 
-        sendSuccess(res, data, msg.PAYMENTS_RETRIEVED_SUCCESS);
+        return sendSuccess(res, data, msg.PAYMENTS_RETRIEVED_SUCCESS);
     }),
 
 }

@@ -2,7 +2,7 @@ import { sql,eq } from "drizzle-orm";
 import { db } from '../../db/index';
 import { users } from '../../db/schema';
 import Joi from 'joi';
-import { msg } from '../../lib/constants';
+import { msg } from '../../lib/constants/constants';
 import UserDb from '../../repositories/UserDb'
 
 export default class UserValidator {
@@ -89,11 +89,13 @@ export default class UserValidator {
             ? sql`${users.id} != ${userId} AND ${users.username} = ${username}`
             : sql`${users.username} = ${username}`;
 
-        const existingUser = await db.select().from(users).where(query);
+        const [existingUser] = await db.select().from(users).where(query);
 
-        if (existingUser.length > 0) {
+        if (existingUser) {
             throw new Error(msg.USERNAME_EXISTS);
         }
+
+        return existingUser
     }
 
     async checkEmailExists(email, userId = null) {
@@ -104,10 +106,12 @@ export default class UserValidator {
             ? sql`${users.id} != ${userId} AND ${users.email} = ${email}`
             : sql`${users.email} = ${email}`;
 
-        const existingUser = await db.select().from(users).where(query);
-        if (existingUser.length > 0) {
-            throw new Error(msg.EMAIL_EXISTS);
+        const [existingUser] = await db.select().from(users).where(query);
+        if (existingUser) {
+            throw new Error(msg.USERNAME_EXISTS);
         }
+
+        return existingUser
     }
 
     static getInstance() {

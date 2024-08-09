@@ -2,7 +2,7 @@ import { eq, sql, and } from "drizzle-orm";
 import { db } from '../../db/index';
 import { payments } from '../../db/schema';
 import Joi from 'joi';
-import { msg } from '../../lib/constants';
+import { msg } from '../../lib/constants/constants';
 
 export default class PaymentValidator {
 

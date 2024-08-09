@@ -2,16 +2,18 @@ import path from 'path';
 import fs from 'fs/promises';
 import { db } from './db/index';
 import { roles, permissions, settings } from './db/schema';
-import RoleValidator from './services/auth/RoleValidator';
-import PermissionValidator from './services/auth/PermissionValidator';
-import { msg } from './lib/constants';
+import RoleValidator from './Validators/auth/RoleValidator';
+import PermissionValidator from './Validators/auth/PermissionValidator';
+import { msg } from './lib/constants/constants';
 import folderDb from './repositories/folderDb';
+import PermissionDb from './repositories/PermissionDb';
+import RoleDb from './repositories/RoleDb';
 import UserDb from './repositories/UserDb';
+import RolePermissionDb from './repositories/RolePermissionDb';
 import { hashPassword } from './lib/utils';
-import StorageManager from './services/storage/StorageManager';
+import StorageManager from './services/StorageManager';
 import dotenv from 'dotenv';
 import { v4 as uuidv4 } from 'uuid';
-
 dotenv.config();
 
 const roleValidator = new RoleValidator();
@@ -37,6 +39,7 @@ const initializeRoles = async () => {
 };
 
 const initializePermissions = async () => {
+
     const permissionsPath = path.join(__dirname, 'config', 'permissions.json');
     const permissionsData = JSON.parse(await fs.readFile(permissionsPath, 'utf8'));
 
@@ -54,19 +57,26 @@ const initializePermissions = async () => {
 };
 
 const initializeFolders = async () => {
-    const basePath = storageManager.basePath;
-    const homeFolderId = storageManager.homeFolderId;
-    const tempFolderId = storageManager.tempFolderId;
 
+    const basePath = storageManager.basePath;
+    const homeFolderId = process.env.HOME_FOLDER_ID;
+    const tempFolderId = process.env.TEMP_FOLDER_ID;
+    const trashFolderId = process.env.TRASH_FOLDER_ID;
+    const usersFolderId = process.env.USER_FOLDER_ID;
+    const expensesFolderId = process.env.EXPENSES_FOLDER_ID;
+    const paymentsFolderId = process.env.PAYMENTS_FOLDER_ID;
+    const customersFolderId = process.env.CUSTOMERS_FOLDER_ID;
+    const agreementsFolderId = process.env.AGREEMENTS_FOLDER_ID;
+   
     const folders = [
         { id: homeFolderId, name: 'home', parentId: null, isPhysical: true },
         { id: tempFolderId, name: 'temp', parentId: homeFolderId, isPhysical: true },
-        { id: tempFolderId, name: 'trash', parentId: homeFolderId, isPhysical: true },
-        { id: "33333333-3333-3333-3333-333333333333", name: 'users', parentId: homeFolderId, isPhysical: true },
-        { id: "44444444-4444-4444-4444-444444444444", name: 'expenses', parentId: homeFolderId, isPhysical: true },
-        { id: "55555555-5555-5555-5555-555555555555", name: 'payments', parentId: homeFolderId, isPhysical: true },
-        { id: "66666666-6666-6666-6666-666666666666", name: 'customers', parentId: homeFolderId, isPhysical: true },
-        { id: "77777777-7777-7777-7777-777777777777", name: 'agreements', parentId: homeFolderId, isPhysical: true }
+        { id: trashFolderId, name: 'trash', parentId: homeFolderId, isPhysical: true },
+        { id: usersFolderId, name: 'users', parentId: homeFolderId, isPhysical: true },
+        { id: expensesFolderId, name: 'expenses', parentId: homeFolderId, isPhysical: true },
+        { id: paymentsFolderId, name: 'payments', parentId: homeFolderId, isPhysical: true },
+        { id: customersFolderId, name: 'customers', parentId: homeFolderId, isPhysical: true },
+        { id: agreementsFolderId, name: 'agreements', parentId: homeFolderId, isPhysical: true }
     ];
 
     for (const folder of folders) {
@@ -118,6 +128,13 @@ const initializeAdminUser = async () => {
         } else {
             console.log(msg.ADMIN_USER_ALREADY_EXISTS);
         }
+
+        const adminRoleId = await RoleDb.getAdminRoleId();
+        const permissionIds = await PermissionDb.getAllPermissionsIds();
+        await RolePermissionDb.assignPermissionsToRole(adminRoleId, permissionIds);
+
+        console.log(msg.PERMISSIONS_ASSIGNED_TO_ADMIN_SUCCESS);
+
     } catch (error) {
         console.error(`${msg.USER_NOT_FOUND}: ${error.message}`);
     }

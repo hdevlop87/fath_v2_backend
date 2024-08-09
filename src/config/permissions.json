@@ -1,50 +1,197 @@
 [
-  {
-      "permissionName": "view_users",
-      "description": "Can view all users"
-  },
-  {
-      "permissionName": "delete_users",
-      "description": "Can delete all users"
-  },
-  {
+    {
+      "permissionName": "read_user",
+      "description": "Permission to read a single user's information"
+    },
+    {
       "permissionName": "create_user",
-      "description": "Can create a new user"
-  },
-  {
+      "description": "Permission to create a new user"
+    },
+    {
       "permissionName": "update_user",
-      "description": "Can update a user"
-  },
-  {
-      "permissionName": "get_user",
-      "description": "Can get a user"
-  },
-  {
-      "permissionName": "get_user_roles",
-      "description": "Can get a user's roles"
-  },
-  {
-      "permissionName": "get_user_permissions",
-      "description": "Can get a user's permissions"
-  },
-  {
-      "permissionName": "view_roles",
-      "description": "Can view all roles"
-  },
-  {
+      "description": "Permission to update a single user's information"
+    },
+    {
+      "permissionName": "delete_user",
+      "description": "Permission to delete a single user"
+    },
+
+    {
+      "permissionName": "read_role",
+      "description": "Permission to read a single role's information"
+    },
+    {
       "permissionName": "create_role",
-      "description": "Can create a new role"
-  },
-  {
+      "description": "Permission to create a new role"
+    },
+    {
       "permissionName": "update_role",
-      "description": "Can update a role"
-  },
-  {
+      "description": "Permission to update a single role's information"
+    },
+    {
       "permissionName": "delete_role",
-      "description": "Can delete a role"
-  },
-  {
-      "permissionName": "get_role",
-      "description": "Can get a role"
-  }
-]
+      "description": "Permission to delete a single role"
+    },
+
+    {
+      "permissionName": "read_permission",
+      "description": "Permission to read a single permission's information"
+    },
+    {
+      "permissionName": "create_permission",
+      "description": "Permission to create a new permission"
+    },
+    {
+      "permissionName": "update_permission",
+      "description": "Permission to update a single permission's information"
+    },
+    {
+      "permissionName": "delete_permission",
+      "description": "Permission to delete a single permission"
+    },
+
+    {
+      "permissionName": "read_settings",
+      "description": "Permission to read all settings"
+    },
+    {
+      "permissionName": "post_settings",
+      "description": "Permission to post settings"
+    },
+
+    {
+      "permissionName": "read_file",
+      "description": "Permission to read a single file's information"
+    },
+    {
+      "permissionName": "create_file",
+      "description": "Permission to create a new file"
+    },
+    {
+      "permissionName": "update_file",
+      "description": "Permission to update a single file's information"
+    },
+    {
+      "permissionName": "delete_file",
+      "description": "Permission to delete a single file"
+    },
+    {
+      "permissionName": "download_file",
+      "description": "Permission to download file"
+    },
+
+    {
+      "permissionName": "read_folder",
+      "description": "Permission to read a single folder's information"
+    },
+    {
+      "permissionName": "create_folder",
+      "description": "Permission to create a new folder"
+    },
+    {
+      "permissionName": "update_folder",
+      "description": "Permission to update a single folder's information"
+    },
+    {
+      "permissionName": "delete_folder",
+      "description": "Permission to delete a single folder"
+    },
+
+    {
+      "permissionName": "read_lot",
+      "description": "Permission to read a single lot's information"
+    },
+    {
+      "permissionName": "create_lot",
+      "description": "Permission to create a new lot"
+    },
+    {
+      "permissionName": "update_lot",
+      "description": "Permission to update a single lot's information"
+    },
+    {
+      "permissionName": "delete_lot",
+      "description": "Permission to delete a single lot"
+    },
+
+    {
+      "permissionName": "read_customer",
+      "description": "Permission to read a single customer's information"
+    },
+    {
+      "permissionName": "create_customer",
+      "description": "Permission to create a new customer"
+    },
+    {
+      "permissionName": "update_customer",
+      "description": "Permission to update a single customer's information"
+    },
+    {
+      "permissionName": "delete_customer",
+      "description": "Permission to delete a single customer"
+    },
+
+    {
+      "permissionName": "read_sale",
+      "description": "Permission to read a single sale's information"
+    },
+    {
+      "permissionName": "create_sale",
+      "description": "Permission to create a new sale"
+    },
+    {
+      "permissionName": "update_sale",
+      "description": "Permission to update a single sale's information"
+    },
+    {
+      "permissionName": "delete_sale",
+      "description": "Permission to delete a single sale"
+    },
+
+    {
+      "permissionName": "read_payment",
+      "description": "Permission to read a single payment's information"
+    },
+    {
+      "permissionName": "create_payment",
+      "description": "Permission to create a new payment"
+    },
+    {
+      "permissionName": "update_payment",
+      "description": "Permission to update a single payment's information"
+    },
+    {
+      "permissionName": "delete_payment",
+      "description": "Permission to delete a single payment"
+    },
+
+    {
+      "permissionName": "read_expense",
+      "description": "Permission to read a single expense's information"
+    },
+    {
+      "permissionName": "create_expense",
+      "description": "Permission to create a new expense"
+    },
+    {
+      "permissionName": "update_expense",
+      "description": "Permission to update a single expense's information"
+    },
+    {
+      "permissionName": "delete_expense",
+      "description": "Permission to delete a single expense"
+    },
+    
+    {
+      "permissionName": "read_dashData",
+      "description": "Permission to read a single dashData's information"
+    },
+    {
+      "permissionName": "send_agreement",
+      "description": "Permission to send agreement"
+    },
+    {
+      "permissionName": "download_agreement",
+      "description": "Permission to download agreement"
+    }
+  ]

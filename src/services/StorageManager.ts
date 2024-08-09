@@ -1,8 +1,10 @@
 import fs from 'fs/promises';
 import path from 'path';
-import { getFileTypeInfo } from '../../lib/utils';
-import folderDb from '../../repositories/folderDb';
+import { getFileTypeInfo } from '../lib/utils';
+import folderDb from '../repositories/folderDb';
 import { v4 as uuidv4 } from 'uuid';
+import dotenv from 'dotenv';
+dotenv.config();
 
 class StorageManager {
     static instance = null;
@@ -20,9 +22,9 @@ class StorageManager {
         }
         this.basePath = path.join(process.cwd(), "storage");
         this.tempFolderPath = path.join(this.basePath, "temp");
-        this.homeFolderId = "00000000-0000-0000-0000-000000000000";
-        this.trashFolderId= "11111111-1111-1111-1111-111111111111";
-        this.tempFolderId = "22222222-2222-2222-2222-222222222222";
+        this.homeFolderId = process.env.HOME_FOLDER_ID;
+        this.trashFolderId= process.env.TRASH_FOLDER_ID;
+        this.tempFolderId = process.env.TEMP_FOLDER_ID;
     }
 
 

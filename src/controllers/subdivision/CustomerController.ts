@@ -1,13 +1,13 @@
-import { sendSuccess, sendError } from '../../services/responseHandler';
-import CustomerValidator from '../../services/subdivision/CustomerValidator';
+import { sendSuccess, sendError, withErrorHandler } from '../../services/responseHandler';
+import CustomerValidator from '../../Validators/subdivision/CustomerValidator';
 import customerDb from '../../repositories/CustomerDb';
-import asyncHandler from '../../lib/asyncHandler';
+
 import { parseCSVFile } from '../../lib/utils';
 import LotDb from '../../repositories/LotDb';
 import FolderDb from '../../repositories/folderDb';
-import { msg } from '../../lib/constants';
+import { msg } from '../../lib/constants/constants';
 import FolderController from '../storage/folderController'
-import StorageManager from '../../services/storage/StorageManager'
+import StorageManager from '../../services/StorageManager'
 import { v4 as uuidv4 } from 'uuid';
 import path from 'path';
 import fs from 'fs/promises';
@@ -18,19 +18,19 @@ const parentFolderId = "77777777-7777-7777-7777-777777777777";
 
 const CustomerController = {
     //===================== many customers actions ======================//
-    getAllCustomers: asyncHandler(async (req, res) => {
+    getAllCustomers: withErrorHandler(async (req, res) => {
         const allCustomers = await customerDb.findAllCustomers();
-        sendSuccess(res, allCustomers, msg.CUSTOMERS_RETRIEVED_SUCCESS);
+        return sendSuccess(res, allCustomers, msg.CUSTOMERS_RETRIEVED_SUCCESS);
     }),
 
-    deleteAllCustomers: asyncHandler(async (req, res) => {
+    deleteAllCustomers: withErrorHandler(async (req, res) => {
         await customerDb.deleteAllCustomers();
         await LotDb.setOrphanedLotsAvailable();
-        sendSuccess(res, null, msg.CUSTOMERS_DELETED_SUCCESS);
+        return sendSuccess(res, null, msg.CUSTOMERS_DELETED_SUCCESS);
     }),
     //===============================================================//
 
-    createCustomer: asyncHandler(async (req, res) => {
+    createCustomer: withErrorHandler(async (req, res) => {
 
         const customerDetail = req.body;
         await customerValidator.validateCustomerSchema(customerDetail);
@@ -54,10 +54,10 @@ const CustomerController = {
         }
 
         const newCustomer = await customerDb.createCustomer(customerDetail);
-        sendSuccess(res, newCustomer, msg.CUSTOMER_CREATED_SUCCESS, 201);
+        return sendSuccess(res, newCustomer, msg.CUSTOMER_CREATED_SUCCESS, 201);
     }),
 
-    updateCustomer: asyncHandler(async (req, res) => {
+    updateCustomer: withErrorHandler(async (req, res) => {
         const customerId = req.params.id;
         const customerDetails = req.body;
 
@@ -68,16 +68,16 @@ const CustomerController = {
         customerDetails.updatedAt = new Date();
 
         const updatedCustomer = await customerDb.updateCustomer(customerId, customerDetails);
-        sendSuccess(res, updatedCustomer, msg.CUSTOMER_UPDATED_SUCCESS);
+        return sendSuccess(res, updatedCustomer, msg.CUSTOMER_UPDATED_SUCCESS);
     }),
 
-    getCustomerById: asyncHandler(async (req, res) => {
+    getCustomerById: withErrorHandler(async (req, res) => {
         const customerId = req.params.id;
         const customer = await customerValidator.checkCustomerExists(customerId);
-        sendSuccess(res, customer, msg.CUSTOMER_RETRIEVED_SUCCESS);
+        return sendSuccess(res, customer, msg.CUSTOMER_RETRIEVED_SUCCESS);
     }),
 
-    deleteCustomerById: asyncHandler(async (req, res) => {
+    deleteCustomerById: withErrorHandler(async (req, res) => {
         const customerId = req.params.id;
         await customerValidator.checkCustomerExists(customerId);
         const customer = await customerDb.deleteCustomerById(customerId);
@@ -92,10 +92,10 @@ const CustomerController = {
         }
 
         await LotDb.setOrphanedLotsAvailable();
-        sendSuccess(res, customer, msg.CUSTOMER_DELETED_SUCCESS);
+        return sendSuccess(res, customer, msg.CUSTOMER_DELETED_SUCCESS);
     }),
 
-    bulkAddCustomersFromCSV: asyncHandler(async (req, res) => {
+    bulkAddCustomersFromCSV: withErrorHandler(async (req, res) => {
         const filePath = req.body.path;
         const customersData: any = await parseCSVFile(filePath);
 
@@ -120,7 +120,7 @@ const CustomerController = {
             }
         }
 
-        sendSuccess(res, { addedCustomers, skippedCustomers }, msg.CUSTOMERS_INIT_SUCCESS);
+        return sendSuccess(res, { addedCustomers, skippedCustomers }, msg.CUSTOMERS_INIT_SUCCESS);
     }),
 
 };

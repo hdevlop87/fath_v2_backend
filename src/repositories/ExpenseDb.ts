@@ -11,7 +11,7 @@ const expenseDb = {
 
     deleteAllExpenses: async () => {
         const allExpenses = await db.delete(expenses);
-        await expenseDb.resetSequence()
+        await expenseDb.resetSequence();
         return allExpenses
     },
 
@@ -43,14 +43,14 @@ const expenseDb = {
         const [deletedExpense] = await db.delete(expenses)
             .where(eq(expenses.expenseId, expenseId))
             .returning();
-        await expenseDb.resetSequence()
+        await expenseDb.resetSequence();
         return deletedExpense;
     },
 
     getTotalExpenses: async () => {
         const expenses: any = await expenseDb.findAllExpenses();
         return expenses.reduce((total, expense) => total + parseFloat(expense.amount), 0);
-    },
+    }, 
 
     resetSequence: async () => {
         try {

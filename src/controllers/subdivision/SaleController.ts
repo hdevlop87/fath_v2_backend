@@ -1,15 +1,15 @@
-import CustomerValidator from '../../services/subdivision/CustomerValidator';
-import PaymentValidator from '../../services/subdivision/PaymentValidator';
-import { sendSuccess, sendError } from '../../services/responseHandler';
-import SaleValidator from '../../services/subdivision/SaleValidator';
-import LotValidator from '../../services/subdivision/LotValidator';
+import CustomerValidator from '../../Validators/subdivision/CustomerValidator';
+import PaymentValidator from '../../Validators/subdivision/PaymentValidator';
+import { sendSuccess, sendError, withErrorHandler } from '../../services/responseHandler';
+import SaleValidator from '../../Validators/subdivision/SaleValidator';
+import LotValidator from '../../Validators/subdivision/LotValidator';
 import customerDb from '../../repositories/CustomerDb';
 import paymentDb from '../../repositories/PaymentDb';
-import asyncHandler from '../../lib/asyncHandler';
+
 import { parseCSVFile } from '../../lib/utils';
 import saleDb from '../../repositories/SaleDb';
 import lotDb from '../../repositories/LotDb';
-import { msg } from '../../lib/constants';
+import { msg } from '../../lib/constants/constants';
 import { v4 as uuidv4 } from 'uuid';
 import path from 'path';
 import fs from 'fs';
@@ -21,22 +21,21 @@ const paymentValidator = new PaymentValidator();
 
 const SaleController = {
     //===================== many sales actions ======================//
-    getAllSales: asyncHandler(async (req, res) => {
+    getAllSales: withErrorHandler(async (req, res) => {
         const allSales = await saleDb.findAllSales();
-        sendSuccess(res, allSales, msg.SALES_RETRIEVED_SUCCESS);
+        return sendSuccess(res, allSales, msg.SALES_RETRIEVED_SUCCESS);
     }),
 
-    deleteAllSales: asyncHandler(async (req, res) => {
+    deleteAllSales: withErrorHandler(async (req, res) => {
         await saleDb.deleteAllSales();
         await saleDb.resetSequence();
         await lotDb.setOrphanedLotsAvailable();
-        sendSuccess(res, null, msg.SALES_DELETED_SUCCESS);
+        return sendSuccess(res, null, msg.SALES_DELETED_SUCCESS);
     }),
     //===============================================================//
 
-    createSale: asyncHandler(async (req, res) => {
+    createSale: withErrorHandler(async (req, res) => {
         const { lotId, customerId } = req.body;
-
         const saleDetail = req.body;
         await saleValidator.validateSaleSchema(saleDetail);
         await saleValidator.checkLotExistsInSales(lotId)
@@ -54,11 +53,13 @@ const SaleController = {
 
         await lotDb.updateLotStatus(lotId, msg.RESERVED);
         const newSale = await saleDb.createSale(saleDetail);
-        sendSuccess(res, newSale, msg.SALE_CREATED_SUCCESS, 201);
+        return sendSuccess(res, newSale, msg.SALE_CREATED_SUCCESS, 201);
     }),
 
-    createWizard: asyncHandler(async (req, res) => {
+    createWizard: withErrorHandler(async (req, res) => {
         const { customer, sale, payment } = req.body;
+
+        
 
         //=== step1:create customer or return exists one
         let newCustomer
@@ -105,14 +106,15 @@ const SaleController = {
 
         const newPayment = await paymentDb.createPayment(payment);
 
+        
         await lotDb.updateLotStatus(lotId, msg.RESERVED);
         await lotDb.updateLotPricePerM2(lotId, pricePerM2);
         await saleDb.updateSaleOnPayment(newSale.saleId);
 
-        sendSuccess(res, { newCustomer, sale, newPayment }, msg.SALE_CREATED_SUCCESS, 201);
+        return sendSuccess(res, { newCustomer, sale, newPayment }, msg.SALE_CREATED_SUCCESS, 201);
     }),
 
-    updateSale: asyncHandler(async (req, res) => {
+    updateSale: withErrorHandler(async (req, res) => {
         const saleId = req.params.id;
         const { lotRef, customerId, pricePerM2, date, isActif } = req.body;
 
@@ -153,25 +155,25 @@ const SaleController = {
         }
         await lotDb.updateLotPricePerM2(lotId, pricePerM2);
         await lotDb.setOrphanedLotsAvailable();
-        sendSuccess(res, updatedSale, msg.SALE_UPDATED_SUCCESS);
+        return sendSuccess(res, updatedSale, msg.SALE_UPDATED_SUCCESS);
     }),
 
-    getSaleById: asyncHandler(async (req, res) => {
+    getSaleById: withErrorHandler(async (req, res) => {
         const saleId = req.params.id;
         const sale = await saleValidator.checkSaleExists(saleId)
-        sendSuccess(res, sale, msg.SALE_RETRIEVED_SUCCESS);
+        return sendSuccess(res, sale, msg.SALE_RETRIEVED_SUCCESS);
     }),
 
-    deleteSaleById: asyncHandler(async (req, res) => {
+    deleteSaleById: withErrorHandler(async (req, res) => {
         const saleId = req.params.id;
         await saleValidator.checkSaleExists(saleId);
         const sale = await saleDb.deleteSaleById(saleId);
         await lotDb.setOrphanedLotsAvailable();
         await saleDb.resetSequence();
-        sendSuccess(res, sale, msg.SALE_DELETED_SUCCESS);
+        return sendSuccess(res, sale, msg.SALE_DELETED_SUCCESS);
     }),
 
-    initializeSales: asyncHandler(async (req, res) => {
+    initializeSales: withErrorHandler(async (req, res) => {
         const salesPath = path.join(__dirname, '../config', 'sales.json');
         const salesData = JSON.parse(fs.readFileSync(salesPath, 'utf8'));
 
@@ -193,10 +195,10 @@ const SaleController = {
             }
         }
 
-        sendSuccess(res, { addedSales, skippedSales }, msg.SALES_INIT_SUCCESS);
+        return sendSuccess(res, { addedSales, skippedSales }, msg.SALES_INIT_SUCCESS);
     }),
 
-    bulkAddSalesFromCSV: asyncHandler(async (req, res) => {
+    bulkAddSalesFromCSV: withErrorHandler(async (req, res) => {
         const filePath = req.body.path;
 
         if (!filePath || !fs.existsSync(filePath)) {
@@ -223,7 +225,7 @@ const SaleController = {
             }
         }
 
-        sendSuccess(res, { addedSales, skippedSales }, msg.SALES_INIT_SUCCESS);
+        return sendSuccess(res, { addedSales, skippedSales }, msg.SALES_INIT_SUCCESS);
     }),
 };
 

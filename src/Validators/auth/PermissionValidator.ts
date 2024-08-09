@@ -2,7 +2,7 @@ import { sql,eq } from "drizzle-orm";
 import { db } from '../../db/index';
 import { permissions } from '../../db/schema'; 
 import Joi from 'joi';
-import { msg } from '../../lib/constants';
+import { msg } from '../../lib/constants/constants';
 
 export default class PermissionValidator {
     static instance = null;

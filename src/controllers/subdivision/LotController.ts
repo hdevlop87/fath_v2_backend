@@ -1,9 +1,9 @@
-import { sendSuccess, sendError } from '../../services/responseHandler';
-import LotValidator from '../../services/subdivision/LotValidator';
-import asyncHandler from '../../lib/asyncHandler';
+import { sendSuccess, sendError, withErrorHandler } from '../../services/responseHandler';
+import LotValidator from '../../Validators/subdivision/LotValidator';
+
 import {parseCSVFile} from '../../lib/utils';
 import LotDb from '../../repositories/LotDb';
-import { msg } from '../../lib/constants';
+import { msg } from '../../lib/constants/constants';
 import path from 'path';
 import fs from 'fs';
 
@@ -11,32 +11,37 @@ const lotValidator = new LotValidator()
 
 const LotController = {
     //===================== many lots actions ======================//
-    getAllLots: asyncHandler(async (req, res) => {
+    getAllLots: withErrorHandler(async (req, res) => {
         const allLots = await LotDb.findAllLots();
-        sendSuccess(res, allLots, msg.LOTS_RETRIEVED_SUCCESS);
+        return sendSuccess(res, allLots, msg.LOTS_RETRIEVED_SUCCESS);
     }),
 
-    getLotsMap: asyncHandler(async (req, res) => {
+    getLotsMap: withErrorHandler(async (req, res) => {
         const allLots = await LotDb.findLotMap();
-        sendSuccess(res, allLots, msg.LOTS_RETRIEVED_SUCCESS);
+        return sendSuccess(res, allLots, msg.LOTS_RETRIEVED_SUCCESS);
     }),
 
-    deleteAllLots: asyncHandler(async (req, res) => {
+    getLotsMapLandingPage: withErrorHandler(async (req, res) => {
+        const allLots = await LotDb.findLotLandingPage();
+        return sendSuccess(res, allLots, msg.LOTS_RETRIEVED_SUCCESS);
+    }),
+
+    deleteAllLots: withErrorHandler(async (req, res) => {
         await LotDb.deleteAllLots();
         await LotDb.resetSequence();
-        sendSuccess(res, null, msg.LOTS_DELETED_SUCCESS);
+        return sendSuccess(res, null, msg.LOTS_DELETED_SUCCESS);
     }),
     //===============================================================//
 
-    createLot: asyncHandler(async (req, res) => {
+    createLot: withErrorHandler(async (req, res) => {
         const lotDetail = req.body;
         await lotValidator.validateLotSchema(lotDetail);
         await lotValidator.checkLotRefExists(lotDetail.lotRef);
         const newLot = await LotDb.createLot(lotDetail);
-        sendSuccess(res, newLot, msg.LOT_CREATED_SUCCESS, 201);
+        return sendSuccess(res, newLot, msg.LOT_CREATED_SUCCESS, 201);
     }),
 
-    updateLot: asyncHandler(async (req, res) => {
+    updateLot: withErrorHandler(async (req, res) => {
 
         const lotId = req.params.id;
         const lotDetails = req.body;
@@ -47,24 +52,24 @@ const LotController = {
         }
         const updatedLotDetails = { ...existingLot, ...lotDetails };
         const updatedLot = await LotDb.updateLot(lotId, updatedLotDetails);
-        sendSuccess(res, updatedLot, msg.LOT_UPDATED_SUCCESS);
+        return sendSuccess(res, updatedLot, msg.LOT_UPDATED_SUCCESS);
     }),
 
-    getLotById: asyncHandler(async (req, res) => {
+    getLotById: withErrorHandler(async (req, res) => {
         const lotId = req.params.id;
         const lot = await lotValidator.checkLotExists(lotId)
-        sendSuccess(res, lot, msg.LOT_RETRIEVED_SUCCESS);
+        return sendSuccess(res, lot, msg.LOT_RETRIEVED_SUCCESS);
     }),
 
-    deleteLotById: asyncHandler(async (req, res) => {
+    deleteLotById: withErrorHandler(async (req, res) => {
         const lotId = req.params.id;
         await lotValidator.checkLotExists(lotId);
         const lot = await LotDb.deleteLotById(lotId);
         await LotDb.resetSequence();
-        sendSuccess(res, lot, msg.LOT_DELETED_SUCCESS);
+        return sendSuccess(res, lot, msg.LOT_DELETED_SUCCESS);
     }),
 
-    initializeLots: asyncHandler(async (req, res) => {
+    initializeLots: withErrorHandler(async (req, res) => {
         const lotsPath = path.join(__dirname, '../config', 'lots.json');
         const lotsData = JSON.parse(fs.readFileSync(lotsPath, 'utf8'));
 
@@ -87,10 +92,10 @@ const LotController = {
             }
         }
 
-        sendSuccess(res, { addedLots, skippedLots }, msg.LOTS_INIT_SUCCESS);
+        return sendSuccess(res, { addedLots, skippedLots }, msg.LOTS_INIT_SUCCESS);
     }),
 
-    bulkAddLotsFromCSV: asyncHandler(async (req, res) => {
+    bulkAddLotsFromCSV: withErrorHandler(async (req, res) => {
         const filePath = req.body.path; 
 
         if (!filePath || !fs.existsSync(filePath)) {
@@ -118,9 +123,9 @@ const LotController = {
                 }
             }
 
-            sendSuccess(res, { addedLots, skippedLots }, msg.LOTS_INIT_SUCCESS);
+            return sendSuccess(res, { addedLots, skippedLots }, msg.LOTS_INIT_SUCCESS);
         } catch (error) {
-            sendError(res, error.message);
+            return sendError(res, error.message);
         }
     }),
 

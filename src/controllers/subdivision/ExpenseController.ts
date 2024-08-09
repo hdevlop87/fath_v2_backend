@@ -1,12 +1,12 @@
-import ExpenseValidator from '../../services/subdivision/ExpenseValidator';
-import { sendSuccess, sendError } from '../../services/responseHandler';
+import ExpenseValidator from '../../Validators/subdivision/ExpenseValidator';
+import { sendSuccess, sendError, withErrorHandler } from '../../services/responseHandler';
 import expenseDb from '../../repositories/ExpenseDb';
-import asyncHandler from '../../lib/asyncHandler'
+
 import saleDb from '../../repositories/SaleDb';
 import fileDb from '../../repositories/fileDb';
-import {parseCSVFile} from '../../lib/utils';
+import { parseCSVFile } from '../../lib/utils';
 import { promises as fsPromises } from 'fs';
-import { msg } from '../../lib/constants';
+import { msg } from '../../lib/constants/constants';
 import path from 'path';
 import fs from 'fs';
 
@@ -14,79 +14,66 @@ const expenseValidator = new ExpenseValidator();
 
 const ExpenseController = {
 
-    getAllExpenses: asyncHandler(async (req, res) => {
+    getAllExpenses: withErrorHandler(async (req, res) => {
         const allExpenses = await expenseDb.findAllExpenses();
-        sendSuccess(res, allExpenses, msg.PAYMENTS_RETRIEVED_SUCCESS);
+        return sendSuccess(res, allExpenses, msg.PAYMENTS_RETRIEVED_SUCCESS);
     }),
 
-    deleteAllExpenses: asyncHandler(async (req, res) => {
+    deleteAllExpenses: withErrorHandler(async (req, res) => {
         await expenseDb.deleteAllExpenses();
-        await expenseDb.resetSequence();
         await saleDb.resetAllSales()
-        sendSuccess(res, null, msg.PAYMENTS_DELETED_SUCCESS);
+        return sendSuccess(res, null, msg.PAYMENTS_DELETED_SUCCESS);
     }),
     //=================================================================//
 
-    createExpense: asyncHandler(async (req, res) => {
+    createExpense: withErrorHandler(async (req, res) => {
         const expenseDetails = req.body;
         const { receipt } = expenseDetails;
         await expenseValidator.validateExpenseSchema(expenseDetails);
-        await expenseValidator.checkReceiptUnique(receipt);
+        if (receipt) {
+            await expenseValidator.checkReceiptUnique(receipt);
+        }
         const newExpense = await expenseDb.createExpense(expenseDetails);
-        sendSuccess(res, newExpense, msg.PAYMENT_CREATED_SUCCESS, 201);
+        return sendSuccess(res, newExpense, msg.PAYMENT_CREATED_SUCCESS, 201);
     }),
 
-    updateExpense: asyncHandler(async (req, res) => {
+    updateExpense: withErrorHandler(async (req, res) => {
         const expenseId = req.params.id;
         const expenseDetails = req.body;
         const hasReceipt = !!expenseDetails.receipt;
-        let oldExpense = await expenseValidator.checkExpenseExists(expenseId)
 
-        const validations = {
-            expenseId: expenseValidator.checkExpenseExists,
-            receipt: expenseValidator.checkReceiptUnique,
-        };
-
-        for (const [field, validationFn] of Object.entries(validations)) {
-            if (expenseDetails.hasOwnProperty(field)) {
-                await validationFn(expenseDetails[field], expenseId);
-            }
-        }
-
-        if (expenseDetails.receipt && expenseDetails.receipt !== oldExpense.receipt) {
-            try {
-                await fsPromises.rm(oldExpense.receipt); 
-                await fileDb.deleteFileByPath(oldExpense.receipt)
-            } catch (err) {
-                console.error('Failed to remove old receipt file:', err);
-            }
-        }
+        let oldExpense = await expenseValidator.checkExpenseExists(expenseId);
 
         if (hasReceipt) {
+            await expenseValidator.checkReceiptUnique(expenseDetails.receipt);
             expenseDetails.status = msg.VERIFIED;
         }
 
+        if (expenseDetails.receipt && expenseDetails.receipt !== oldExpense.receipt) {
+            await fsPromises.rm(oldExpense.receipt);
+            await fileDb.deleteFileByPath(oldExpense.receipt)
+        }
+
         const updatedExpense = await expenseDb.updateExpense(expenseId, expenseDetails);
-        sendSuccess(res, updatedExpense, msg.PAYMENT_UPDATED_SUCCESS);
+        return sendSuccess(res, updatedExpense, msg.PAYMENT_UPDATED_SUCCESS);
     }),
 
-    getExpenseById: asyncHandler(async (req, res) => {
+    getExpenseById: withErrorHandler(async (req, res) => {
         const expenseId = req.params.id;
         const expense = await expenseValidator.checkExpenseExists(expenseId)
-        sendSuccess(res, expense, msg.PAYMENT_RETRIEVED_SUCCESS);
+        return sendSuccess(res, expense, msg.PAYMENT_RETRIEVED_SUCCESS);
     }),
 
-    deleteExpenseById: asyncHandler(async (req, res) => {
+    deleteExpenseById: withErrorHandler(async (req, res) => {
         const expenseId = req.params.id;
         await expenseValidator.checkExpenseExists(expenseId);
         const expense = await expenseDb.deleteExpenseById(expenseId);
-        await expenseDb.resetSequence();
-        sendSuccess(res, expense, msg.PAYMENT_DELETED_SUCCESS);
+        return sendSuccess(res, expense, msg.PAYMENT_DELETED_SUCCESS);
     }),
 
     //=================================================================//
 
-    initializeExpenses: asyncHandler(async (req, res) => {
+    initializeExpenses: withErrorHandler(async (req, res) => {
         const expensesPath = path.join(__dirname, '../config', 'expenses.json');
         const expensesData = JSON.parse(fs.readFileSync(expensesPath, 'utf8'));
 
@@ -109,18 +96,18 @@ const ExpenseController = {
             }
         }
 
-        sendSuccess(res, { addedExpenses, skippedExpenses }, msg.PAYMENTS_INIT_SUCCESS);
+        return sendSuccess(res, { addedExpenses, skippedExpenses }, msg.PAYMENTS_INIT_SUCCESS);
     }),
 
-    bulkAddExpensesFromCSV: asyncHandler(async (req, res) => {
-    
+    bulkAddExpensesFromCSV: withErrorHandler(async (req, res) => {
+
         const filePath = req.body.path;
 
         if (!filePath || !fs.existsSync(filePath)) {
             return sendError(res, 'Invalid or missing file path', 400);
         }
 
-        const expensesData:any = await parseCSVFile(filePath);
+        const expensesData: any = await parseCSVFile(filePath);
 
         let addedExpenses = [];
         let skippedExpenses = [];
@@ -141,7 +128,7 @@ const ExpenseController = {
             }
         }
 
-        sendSuccess(res, { addedExpenses, skippedExpenses }, msg.PAYMENTS_INIT_SUCCESS);
+        return sendSuccess(res, { addedExpenses, skippedExpenses }, msg.PAYMENTS_INIT_SUCCESS);
     }),
 };
 

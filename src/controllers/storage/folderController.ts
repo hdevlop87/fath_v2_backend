@@ -1,9 +1,9 @@
-import { sendSuccess } from '../../services/responseHandler';
-import FolderValidator from '../../services/storage/FolderValidator';
-import asyncHandler from '../../lib/asyncHandler';
-import { msg } from '../../lib/constants';
+import { sendSuccess, sendError, withErrorHandler } from '../../services/responseHandler';
+import FolderValidator from '../../Validators/storage/FolderValidator';
+
+import { msg } from '../../lib/constants/constants';
 import { hashPassword } from '../../lib/utils';
-import StorageManager from '../../services/storage/StorageManager';
+import StorageManager from '../../services/StorageManager';
 import folderDb from '../../repositories/folderDb';
 import fileDb from '../../repositories/fileDb'
 import fs from 'fs/promises';
@@ -18,7 +18,7 @@ const protectedFolderNames = ['users', 'expenses', 'payments', 'customers', 'agr
 
 const FolderController = {
 
-    createFolder: asyncHandler(async (req, res) => {
+    createFolder: withErrorHandler(async (req, res) => {
         let { name, parentId } = req.body;
 
         if (!parentId || parentId.trim() === "") {
@@ -39,10 +39,10 @@ const FolderController = {
             path: await storageManager.getRelativePath(folderPath)
         });
 
-        sendSuccess(res, newFolder, msg.FOLDER_CREATED_SUCCESS, 201);
+        return sendSuccess(res, newFolder, msg.FOLDER_CREATED_SUCCESS, 201);
     }),
 
-    updateFolder: asyncHandler(async (req, res) => {
+    updateFolder: withErrorHandler(async (req, res) => {
         const id = req.params.id;
         const folderDetails = req.body;
         const existingFolder = await folderValidator.checkFolderExists(id);
@@ -77,67 +77,70 @@ const FolderController = {
         folderDetails.updatedAt = new Date();
 
         const updatedFolder = await folderDb.updateFolder(id, folderDetails);
-        sendSuccess(res, updatedFolder, msg.FOLDER_UPDATED_SUCCESS);
+        return sendSuccess(res, updatedFolder, msg.FOLDER_UPDATED_SUCCESS);
     }),
 
     //=======================================================//
 
-    getAllFolders: asyncHandler(async (req, res) => {
+    getAllFolders: withErrorHandler(async (req, res) => {
         const allFolders = await folderDb.findAllFolders();
-        sendSuccess(res, allFolders, msg.Folders_RETRIEVED_SUCCESS);
+        return sendSuccess(res, allFolders, msg.Folders_RETRIEVED_SUCCESS);
     }),
 
-    getFolderById: asyncHandler(async (req, res) => {
+    getFolderById: withErrorHandler(async (req, res) => {
         const id = req.params.id;
         const folder = await folderValidator.checkFolderExists(id)
-        sendSuccess(res, folder, msg.folder_RETRIEVED_SUCCESS);
+        return sendSuccess(res, folder, msg.folder_RETRIEVED_SUCCESS);
     }),
 
-    getFoldersByParentId: asyncHandler(async (req, res) => {
+    getFoldersByParentId: withErrorHandler(async (req, res) => {
         let id = req.params.id;
         const folders = await folderDb.findFoldersByParentId(id);
         const filteredFolders = folders.filter(folder => 
             !['temp', 'trash', 'home'].includes(folder.name.toLowerCase())
         );
-        sendSuccess(res, filteredFolders, msg.FILES_RETRIEVED_SUCCESS);
+        return sendSuccess(res, filteredFolders, msg.FILES_RETRIEVED_SUCCESS);
     }),
 
-    getFolderByPath: asyncHandler(async (req, res) => {
+    getFolderByPath: withErrorHandler(async (req, res) => {
         const { path } = req.body;
         const folder = await folderDb.findFolderByPath(path);
         if (!folder) {
             throw new Error('Folder not found');
         }
-        sendSuccess(res, folder, msg.FOLDER_RETRIEVED_SUCCESS);
+        return sendSuccess(res, folder, msg.FOLDER_RETRIEVED_SUCCESS);
     }),
 
     //=======================================================//
 
-    deleteAllFolders: asyncHandler(async (req, res) => {
+    deleteAllFolders: withErrorHandler(async (req, res) => {
         const folders = await folderDb.findAllFolders();
         const deletableFolders = folders.filter(folder => !protectedFolderNames.includes(folder.name.toLowerCase()));
         const deletedFolders = await Promise.all(deletableFolders.map(folder => folderDb.deleteFolderById(folder.id)));
-        sendSuccess(res, deletedFolders, msg.FOLDERS_DELETED_SUCCESS);
+        return sendSuccess(res, deletedFolders, msg.FOLDERS_DELETED_SUCCESS);
     }),
 
-    deleteMultiFolders: asyncHandler(async (req, res) => {
+    deleteMultiFolders: withErrorHandler(async (req, res) => {
         const { ids } = req.body;
         const folders = await folderDb.findFoldersByIds(ids);
         const deletableFolders = folders.filter(folder => !protectedFolderNames.includes(folder.name.toLowerCase()));
         const deletedFolders = await Promise.all(deletableFolders.map(folder => folderDb.deleteFolderById(folder.id)));
-        sendSuccess(res, deletedFolders, msg.FILES_DELETED_SUCCESS);
+        return sendSuccess(res, deletedFolders, msg.FILES_DELETED_SUCCESS);
     }),
 
-    deleteFolderById: asyncHandler(async (req, res) => {
+    deleteFolderById: withErrorHandler(async (req, res) => {
         const id = req.params.id;
         const folder = await folderValidator.checkFolderExists(id);
         if (protectedFolderNames.includes(folder.name.toLowerCase())) {
             throw new Error('This folder cannot be deleted');
         }
         const deletedFolder = await folderDb.deleteFolderById(id);
-        sendSuccess(res, deletedFolder, msg.FOLDER_PERMANENTLY_DELETED_SUCCESS);
+        return sendSuccess(res, deletedFolder, msg.FOLDER_PERMANENTLY_DELETED_SUCCESS);
     }),
 
+    bulkAddFolders: withErrorHandler(async (req, res) => {
+
+    })
 };
 
 export default FolderController;

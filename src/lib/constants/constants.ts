@@ -179,6 +179,8 @@ export const msg: any = {
   AGREEMENT_DOWNLOAD_SUCCESS: 'The agreement document has been successfully downloaded.',
   AGREEMENT_DELETED_SUCCESS: 'Agreement deleted successfully',
   AGREEMENTS_DELETED_SUCCESS: 'All agreements for the sale deleted successfully',
+
+  PERMISSIONS_ASSIGNED_TO_ADMIN_SUCCESS: 'Permissions have been assigned to the Admin role.'
 };
 
 

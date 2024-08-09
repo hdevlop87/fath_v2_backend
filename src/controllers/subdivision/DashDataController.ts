@@ -1,27 +1,29 @@
-import { sendSuccess } from '../../services/responseHandler';
+import { sendSuccess, sendError, withErrorHandler } from '../../services/responseHandler';
 import ExpenseDb from '../../repositories/ExpenseDb';
 import paymentDb from '../../repositories/PaymentDb';
-import asyncHandler from '../../lib/asyncHandler';
+
 import saleDb from '../../repositories/SaleDb';
-import {  payments } from '../../db/schema';
-import { msg } from '../../lib/constants';
+import {  payments,expenses } from '../../db/schema';
+import { msg } from '../../lib/constants/constants';
 import { eq, sql } from "drizzle-orm";
 import { db } from '../../db/index';
 
 const dashDataController = {
 
-    getDashData: asyncHandler(async (req, res) => {
-        let salesLowestVerifiedPayments = await saleDb.findSalesWithLowestVerifiedPayments(6);
+    getDashData: withErrorHandler(async (req, res) => {
+        let salesLowestVerifiedPayments = await saleDb.findSalesWithLowestVerifiedPayments(7);
         let financialData = await dashDataController.getFinancialData();
         let verifiedPaymentsByYear = await dashDataController.getVerifiedPaymentsByYear();
+        let expensesByYear = await dashDataController.getExpensesByYear();
 
         let responseData = {
             salesLowestVerifiedPayments,
             financialData,
-            verifiedPaymentsByYear
+            verifiedPaymentsByYear,
+            expensesByYear
         };
 
-        sendSuccess(res, responseData, msg.PAYMENTS_RETRIEVED_SUCCESS);
+        return sendSuccess(res, responseData, msg.PAYMENTS_RETRIEVED_SUCCESS);
     }),
 
     getFinancialData: async () => {
@@ -31,9 +33,9 @@ const dashDataController = {
         const totalSalesCount = await saleDb.getSalesCount();
 
         return {
-            totalVerifiedPayments,
-            totalExpenses,
-            netAmount: totalVerifiedPayments - totalExpenses,
+            totalVerifiedPayments: totalVerifiedPayments,
+            totalExpenses: totalExpenses,
+            netAmount: (totalVerifiedPayments - totalExpenses),
             totalSalesCount
         };
     },
@@ -44,7 +46,7 @@ const dashDataController = {
 
         const result = await db.select({
             paymentYear,
-            totalPayments
+            totalPayments 
         })
             .from(payments)
             .where(eq(payments.status, msg.VERIFIED))
@@ -54,6 +56,26 @@ const dashDataController = {
 
         result.forEach((row) => {
             row.totalPayments = Number(row.totalPayments);
+        });
+
+        return result;
+    },
+
+    getExpensesByYear: async () => {
+        const totalExpenses = sql`SUM(amount::numeric)`;
+        const expenseYear = sql`DATE_PART('year', date)`;
+
+        const result = await db.select({
+            expenseYear,
+            totalExpenses 
+        })
+            .from(expenses)
+            .groupBy(expenseYear)
+            .orderBy(expenseYear)
+            .execute();
+
+        result.forEach((row) => {
+            row.totalExpenses = Number(row.totalExpenses);
         });
 
         return result;

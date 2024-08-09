@@ -1,64 +1,66 @@
-import asyncHandler from '../../lib/asyncHandler';
-import { eq, and } from "drizzle-orm";
-import { db } from '../../db/index';
-import { rolesPermissions, permissions } from '../../db/schema';
-import { sendSuccess, sendError } from '../../services/responseHandler';
-import RoleValidator from '../../services/auth/RoleValidator';
-import PermissionValidator from '../../services/auth/PermissionValidator';
-import { msg } from '../../lib/constants';
+import { sendSuccess, sendError, withErrorHandler } from '../../services/responseHandler';
+import RoleValidator from '../../Validators/auth/RoleValidator';
+import PermissionValidator from '../../Validators/auth/PermissionValidator';
+import { msg } from '../../lib/constants/constants';
+import RoleDb from '../../repositories/RoleDb';
+import PermissionDb from '../../repositories/PermissionDb';
+import RolePermissionDb from '../../repositories/RolePermissionDb';
 
 const roleValidator = new RoleValidator();
 const permissionValidator = new PermissionValidator();
 
 const RolePermissionController = {
 
-    assignPermissionToRole: asyncHandler(async (req, res) => {
+    assignPermissionToRole: withErrorHandler(async (req, res) => {
         const { roleId, permissionId } = req.body;
 
         await roleValidator.checkRoleExists(roleId);
         await permissionValidator.checkPermissionExists(permissionId);
-        await roleValidator.checkPermissionRoleExists(roleId, permissionId); 
+        await roleValidator.checkPermissionRoleExists(roleId, permissionId);
 
-        const [newRolePermission] = await db.insert(rolesPermissions).values({
-            roleId,
-            permissionId,
-        }).returning();
-
-        sendSuccess(res, newRolePermission, msg.ROLE_PERMISSION_ASSIGNED_SUCCESS);
+        const newRolePermission = await RolePermissionDb.assignPermissionToRole(roleId, permissionId);
+        return sendSuccess(res, newRolePermission, msg.ROLE_PERMISSION_ASSIGNED_SUCCESS);
     }),
 
-    removePermissionFromRole: asyncHandler(async (req, res) => {
+    assignAllPermissionsToAdmin: withErrorHandler(async (req, res) => {
+        const adminRoleId = await RoleDb.getAdminRoleId();
+        const permissionIds = await PermissionDb.getAllPermissionsIds();
+        await RolePermissionDb.assignPermissionsToRole(adminRoleId, permissionIds);
+        return sendSuccess(res, null, msg.PERMISSIONS_ASSIGNED_SUCCESS);
+    }),
+
+    removePermissionFromRole: withErrorHandler(async (req, res) => {
         const { roleId, permissionId } = req.body;
 
         await roleValidator.checkRoleExists(roleId);
         await permissionValidator.checkPermissionExists(permissionId);
 
-        const [deletedRolePermission] = await db.delete(rolesPermissions)
-            .where(and(eq(rolesPermissions.roleId, roleId), eq(rolesPermissions.permissionId, permissionId)))
-            .returning();
+        const deletedRolePermission = await RolePermissionDb.removePermissionFromRole(roleId, permissionId);
 
         if (!deletedRolePermission) {
             return sendError(res, msg.ROLE_PERMISSION_NOT_FOUND, 404);
         }
 
-        sendSuccess(res, deletedRolePermission, msg.ROLE_PERMISSION_REMOVED_SUCCESS);
+        return sendSuccess(res, deletedRolePermission, msg.ROLE_PERMISSION_REMOVED_SUCCESS);
     }),
 
-    getPermissionsRole: asyncHandler(async (req, res) => {
+    getPermissionsRoleById: withErrorHandler(async (req, res) => {
         const roleId = req.params.id;
         await roleValidator.checkRoleExists(roleId);
 
-        let rolePermissions = await db.select({
-            permissionId: permissions.permissionId,
-            permissionName: permissions.permissionName,
-            description: permissions.description,
-        })
-        .from(permissions)
-        .leftJoin(rolesPermissions, eq(permissions.permissionId, rolesPermissions.permissionId))
-        .where(eq(rolesPermissions.roleId, roleId))
-
-        sendSuccess(res, rolePermissions, msg.ROLE_PERMISSIONS_RETRIEVED_SUCCESS);
+        const rolePermissions = await RolePermissionDb.getPermissionsByRoleId(roleId);
+        return sendSuccess(res, rolePermissions, msg.ROLE_PERMISSIONS_RETRIEVED_SUCCESS);
     }),
+
+    getPermissionsRoleByName: withErrorHandler(async (req, res) => {
+        const roleName = req.params.name;
+        await roleValidator.checkRoleNameExists(roleName);
+
+        const rolePermissions = await RolePermissionDb.getPermissionsByRoleName(roleName);
+        return sendSuccess(res, rolePermissions, msg.ROLE_PERMISSIONS_RETRIEVED_SUCCESS);
+    }),
+
+    
 
 };
 

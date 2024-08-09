@@ -1,14 +1,14 @@
 [
-  {
+    {
       "roleName": "Admin",
-      "description": "Administrator role with all permissions."
-  },
-  {
+      "description": "The administrator role with full access to all system features and settings."
+    },
+    {
       "roleName": "Editor",
-      "description": "Regular Editor role with limited permissions."
-  },
-  {
+      "description": "The editor role with permissions to modify content but with some administrative restrictions."
+    },
+    {
       "roleName": "Viewer",
-      "description": "Viewer user with minimal permissions."
-  }
-]
+      "description": "The viewer role with read-only access, allowing users to view content without making any modifications."
+    }
+  ]

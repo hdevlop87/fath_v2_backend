@@ -1,4 +1,4 @@
-import { msg } from '../lib/constants'
+import { msg } from '../lib/constants/constants'
 import { lots, sales, customers } from '../db/schema';
 import { eq, sql } from "drizzle-orm";
 import { db } from '../db/index';
@@ -28,7 +28,24 @@ const lotDb = {
         .leftJoin(customers, eq(sales.customerId, customers.customerId));
     },
 
+    findLotLandingPage: async () => {
+        return await db.select({
+            lotId: lots.lotId,
+            lotRef: lots.lotRef,
+            status: lots.status,
+            size: lots.size,
+            pricePerM2: lots.pricePerM2,
+            zoningCode: lots.zoningCode,
+            description: lots.description,
+            totalPrice: sales.totalPrice,
+        })
+        .from(lots)
+        .leftJoin(sales, eq(lots.lotId, sales.lotId))
+        .leftJoin(customers, eq(sales.customerId, customers.customerId));
+    },
+
     deleteAllLots: async () => {
+        await lotDb.resetSequence();
         return await db.delete(lots);
     },
 
@@ -44,6 +61,7 @@ const lotDb = {
     },
 
     createLot: async (lotDetail) => {
+        await lotDb.resetSequence();
         const [newLot] = await db.insert(lots).values(lotDetail).returning();
         return newLot;
     },
@@ -125,6 +143,7 @@ const lotDb = {
         const [lot] = await db.delete(lots)
             .where(eq(lots.lotId, lotId))
             .returning();
+            await lotDb.resetSequence();
         return lot;
     },
 

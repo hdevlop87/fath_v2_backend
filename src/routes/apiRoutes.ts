@@ -1,14 +1,13 @@
 import express from 'express';
-import { isAuth, isAdmin, hasRole } from '../middleware';
-
-import {adminOnlyRoutes,adminAndEditorRoutes} from './adminRoutes';
-import authRoutes from './authRoutes';
-import publicRoutes from './publicRoutes';
+import {authRoutes} from './authRoutes'
+import {fileManagerRoutes} from './fileManagerRoutes'
+import {subdivisionRoutes} from './subdivisionRoutes'
+import {publicRoutes} from './publicRoutes'
 
 const router = express.Router();
 
-const applyRouteGroup = (routes, middlewares = []) => {
-    routes.forEach(({ path, method, handler }) => {
+const applyRouteGroup = (routes) => {
+    routes.forEach(({ path, method, handler, middlewares = [] }) => {
         if (router[method]) {
             router[method](`/${path}`, ...middlewares, handler);
         } else {
@@ -17,10 +16,9 @@ const applyRouteGroup = (routes, middlewares = []) => {
     });
 };
 
+applyRouteGroup(authRoutes);
+applyRouteGroup(fileManagerRoutes);
+applyRouteGroup(subdivisionRoutes);
 applyRouteGroup(publicRoutes);
-applyRouteGroup(authRoutes, [isAuth]);
-applyRouteGroup(adminOnlyRoutes, [isAdmin]);
-applyRouteGroup(adminAndEditorRoutes, [hasRole('Admin', 'Editor')]);
-
 
 export default router;

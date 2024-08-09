@@ -2,7 +2,7 @@ import { eq, sql, and } from "drizzle-orm";
 import { db } from '../../db/index';
 import { roles,rolesPermissions } from '../../db/schema';
 import Joi from 'joi';
-import { msg } from '../../lib/constants';
+import { msg } from '../../lib/constants/constants';
 
 
 export default class RoleValidator {
@@ -16,8 +16,10 @@ export default class RoleValidator {
             return RoleValidator.instance;
         }
         this.roleSchema = Joi.object({
+            roleId: Joi.any().optional(),
             roleName: Joi.string().required(),
             description: Joi.string().optional(),
+            permissions: Joi.any().optional(),
         });
         this.userRoleSchema = Joi.object({
             userId: Joi.string().required(),
@@ -65,11 +67,11 @@ export default class RoleValidator {
             ? sql`${roles.roleId} != ${roleId} AND ${roles.roleName} = ${roleName}`
             : sql`${roles.roleName} = ${roleName}`;
 
-        const existingRole = await db.select().from(roles).where(query);
-        if (existingRole.length > 0) {
+        const [existingRole] = await db.select().from(roles).where(query);
+        if (existingRole) {
             throw new Error(msg.ROLE_EXISTS);
         }
-        return existingRole.length > 0 ? existingRole[0] : null;
+        return existingRole;
     }
 
     async checkPermissionRoleExists(permissionId, roleId) {

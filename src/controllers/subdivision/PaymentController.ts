@@ -1,13 +1,13 @@
-import PaymentValidator from '../../services/subdivision/PaymentValidator';
-import { sendSuccess, sendError } from '../../services/responseHandler';
-import SaleValidator from '../../services/subdivision/SaleValidator';
+import PaymentValidator from '../../Validators/subdivision/PaymentValidator';
+import { sendSuccess, sendError, withErrorHandler } from '../../services/responseHandler';
+import SaleValidator from '../../Validators/subdivision/SaleValidator';
 import paymentDb from '../../repositories/PaymentDb';
-import asyncHandler from '../../lib/asyncHandler'
+
 import saleDb from '../../repositories/SaleDb';
 import fileDb from '../../repositories/fileDb';
 import { parseCSVFile } from '../../lib/utils';
 import { promises as fsPromises } from 'fs';
-import { msg } from '../../lib/constants';
+import { msg } from '../../lib/constants/constants';
 import path from 'path';
 import fs from 'fs';
 
@@ -17,20 +17,20 @@ const saleValidator = new SaleValidator();
 
 const PaymentController = {
     //===================== many payments actions ======================//
-    getAllPayments: asyncHandler(async (req, res) => {
+    getAllPayments: withErrorHandler(async (req, res) => {
         const allPayments = await paymentDb.findAllPayments();
-        sendSuccess(res, allPayments, msg.PAYMENTS_RETRIEVED_SUCCESS);
+        return sendSuccess(res, allPayments, msg.PAYMENTS_RETRIEVED_SUCCESS);
     }),
 
-    deleteAllPayments: asyncHandler(async (req, res) => {
+    deleteAllPayments: withErrorHandler(async (req, res) => {
         await paymentDb.deleteAllPayments();
         await paymentDb.resetSequence();
         await saleDb.resetAllSales()
-        sendSuccess(res, null, msg.PAYMENTS_DELETED_SUCCESS);
+        return sendSuccess(res, null, msg.PAYMENTS_DELETED_SUCCESS);
     }),
     //===============================================================//
 
-    createPayment: asyncHandler(async (req, res) => {
+    createPayment: withErrorHandler(async (req, res) => {
         let paymentDetails = req.body;
         let { saleId, lotRef, receipt } = paymentDetails;
 
@@ -60,14 +60,14 @@ const PaymentController = {
 
         const newPayment = await paymentDb.createPayment(paymentDetails);
         await saleDb.updateSaleOnPayment(saleId);
-        sendSuccess(res, newPayment, msg.PAYMENT_CREATED_SUCCESS, 201);
+        return sendSuccess(res, newPayment, msg.PAYMENT_CREATED_SUCCESS, 201);
     }),
 
-    updatePayment: asyncHandler(async (req, res) => {
+    updatePayment: withErrorHandler(async (req, res) => {
         const paymentId = req.params.id;
         const paymentDetails = req.body;
         const hasReceipt = !!paymentDetails.receipt;
-        let oldPayment = await paymentValidator.checkPaymentExists(paymentId)
+        let oldPayment = await paymentValidator.checkPaymentExists(paymentId);
 
         const validations = {
             paymentId: paymentValidator.checkPaymentExists,
@@ -98,32 +98,33 @@ const PaymentController = {
         }
 
         const updatedPayment = await paymentDb.updatePayment(paymentId, paymentDetails);
+        
         await saleDb.updateSaleOnPayment(updatedPayment.saleId);
-        sendSuccess(res, updatedPayment, msg.PAYMENT_UPDATED_SUCCESS);
+        return sendSuccess(res, updatedPayment, msg.PAYMENT_UPDATED_SUCCESS);
     }),
 
-    getPaymentById: asyncHandler(async (req, res) => {
+    getPaymentById: withErrorHandler(async (req, res) => {
         const paymentId = req.params.id;
         const payment = await paymentValidator.checkPaymentExists(paymentId)
-        sendSuccess(res, payment, msg.PAYMENT_RETRIEVED_SUCCESS);
+        return sendSuccess(res, payment, msg.PAYMENT_RETRIEVED_SUCCESS);
     }),
 
-    getPaymentsBySaleId: asyncHandler(async (req, res) => {
+    getPaymentsBySaleId: withErrorHandler(async (req, res) => {
         const saleId = req.params.saleId;
         const payments = await paymentDb.getPaymentsBySaleId(saleId);
-        sendSuccess(res, payments, msg.PAYMENTS_RETRIEVED_SUCCESS);
+        return sendSuccess(res, payments, msg.PAYMENTS_RETRIEVED_SUCCESS);
     }),
 
-    deletePaymentById: asyncHandler(async (req, res) => {
+    deletePaymentById: withErrorHandler(async (req, res) => {
         const paymentId = req.params.id;
         await paymentValidator.checkPaymentExists(paymentId);
         const payment = await paymentDb.deletePaymentById(paymentId);
         await paymentDb.resetSequence();
         await saleDb.updateSaleOnPayment(payment.saleId);
-        sendSuccess(res, payment, msg.PAYMENT_DELETED_SUCCESS);
+        return sendSuccess(res, payment, msg.PAYMENT_DELETED_SUCCESS);
     }),
 
-    initializePayments: asyncHandler(async (req, res) => {
+    initializePayments: withErrorHandler(async (req, res) => {
         const paymentsPath = path.join(__dirname, '../config', 'payments.json');
         const paymentsData = JSON.parse(fs.readFileSync(paymentsPath, 'utf8'));
 
@@ -146,10 +147,10 @@ const PaymentController = {
             }
         }
 
-        sendSuccess(res, { addedPayments, skippedPayments }, msg.PAYMENTS_INIT_SUCCESS);
+        return sendSuccess(res, { addedPayments, skippedPayments }, msg.PAYMENTS_INIT_SUCCESS);
     }),
 
-    bulkAddPaymentsFromCSV: asyncHandler(async (req, res) => {
+    bulkAddPaymentsFromCSV: withErrorHandler(async (req, res) => {
 
         const filePath = req.body.path;
 
@@ -178,7 +179,7 @@ const PaymentController = {
             }
         }
 
-        sendSuccess(res, { addedPayments, skippedPayments }, msg.PAYMENTS_INIT_SUCCESS);
+        return sendSuccess(res, { addedPayments, skippedPayments }, msg.PAYMENTS_INIT_SUCCESS);
     }),
 };
 

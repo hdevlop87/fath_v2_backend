@@ -1,18 +1,17 @@
 import { formatNumber, formatDate } from '../../lib/utils';
 import { format } from 'date-fns';
-import fs from 'fs';
 import PizZip from 'pizzip';
 import Docxtemplater from 'docxtemplater';
 import saleDb from '../../repositories/SaleDb';
 import fileDb from '../../repositories/fileDb';
-import asyncHandler from '../../lib/asyncHandler';
+import fs from 'fs/promises';
 import path from 'path';
-import SaleValidator from '../../services/subdivision/SaleValidator';
-import CustomerValidator from '../../services/subdivision/CustomerValidator';
-import LotValidator from '../../services/subdivision/LotValidator';
-import StorageManager from '../../services/storage/StorageManager';
-import { sendSuccess } from '../../services/responseHandler';
-import { msg } from '../../lib/constants';
+import SaleValidator from '../../Validators/subdivision/SaleValidator';
+import CustomerValidator from '../../Validators/subdivision/CustomerValidator';
+import LotValidator from '../../Validators/subdivision/LotValidator';
+import StorageManager from '../../services/StorageManager';
+import { sendSuccess, sendError, withErrorHandler } from '../../services/responseHandler';
+import { msg } from '../../lib/constants/constants';
 import nodemailer from 'nodemailer';
 import { v4 as uuidv4 } from 'uuid';
 import AgreementDb from '../../repositories/AgreementDb';
@@ -22,6 +21,7 @@ const saleValidator = new SaleValidator();
 const customerValidator = new CustomerValidator();
 const lotValidator = new LotValidator();
 const storageManager = new StorageManager();
+const parentFolderId = "77777777-7777-7777-7777-777777777777";
 
 const prepareSaleData = async (saleId) => {
     const sale = await saleValidator.checkSaleExists(saleId);
@@ -31,6 +31,7 @@ const prepareSaleData = async (saleId) => {
 
     const newPayments = payments.map((payment, index) => ({
         index: index + 1,
+        method: payment.method,
         amount: formatNumber(payment.amount),
         date: formatDate(payment.date),
         paymentReference: payment.paymentReference,
@@ -59,10 +60,10 @@ const prepareSaleData = async (saleId) => {
     };
 };
 
-const generateDocument = (data) => {
+const generateDocument = async(data) => {
     const basePath = storageManager.basePath;
     const filePath = path.join(basePath, 'home', 'agreement.docx');
-    const content = fs.readFileSync(filePath, 'binary');
+    const content = await fs.readFile(filePath, 'binary');
     const zip = new PizZip(content);
     const doc = new Docxtemplater();
     doc.loadZip(zip);
@@ -74,11 +75,32 @@ const generateDocument = (data) => {
 };
 
 const saveDocument = async (data, filename) => {
+    const { customerId, saleId } = data;
+    const customerName = `${data.firstName}_${data.lastName}`;
+    const baseFolderPath = await storageManager.getFolderPath(parentFolderId);
+    const folderPath = path.join(baseFolderPath, customerName);
 
-    const { customerId, saleId } = data
-    const parentFolderPath = await FolderDb.getFolderPath(customerId)
+    const canCreateFolder = !await FolderDb.folderExistsByPath(folderPath);
+
+    // Check if the folder exists in the file system
+    const folderExistsInFileSystem = await fs.access(folderPath).then(() => true).catch(() => false);
+
+    if (!folderExistsInFileSystem) {
+        await fs.mkdir(folderPath, { recursive: true });
+    }
+
+    if (canCreateFolder) {
+        await FolderDb.insertFolder({
+            id: data.customerId,
+            parentId: parentFolderId,
+            name: customerName,
+            path: await storageManager.getRelativePath(folderPath)
+        });
+    }
+
+    const parentFolderPath = await FolderDb.getFolderPath(customerId);
     const outputPath = path.join(parentFolderPath, `${filename}.docx`);
-    const buffer = generateDocument(data);
+    const buffer = await generateDocument(data);
 
     const file = await fileDb.insertFile({
         id: uuidv4(),
@@ -98,9 +120,10 @@ const saveDocument = async (data, filename) => {
         fileId: file.id,
     });
 
-    fs.writeFileSync(outputPath, buffer);
+    await fs.writeFile(outputPath, buffer);
     return file;
 };
+
 
 const sendMailWithAttachment = async (name, buffer) => {
     let transporter = nodemailer.createTransport({
@@ -128,17 +151,17 @@ const sendMailWithAttachment = async (name, buffer) => {
 };
 
 const DocumentController = {
-    downloadAgreement: asyncHandler(async (req, res) => {
+    downloadAgreement: withErrorHandler(async (req, res) => {
         const saleId = req.params.id;
         const preparedData = await prepareSaleData(saleId);
         const { lotRef, firstName, lastName } = preparedData;
         const filename = `${firstName}_${lastName}_${lotRef}_agreement`;
 
         const file = await saveDocument(preparedData, filename);
-        sendSuccess(res, file, msg.AGREEMENT_DOWNLOAD_SUCCESS);
+        return sendSuccess(res, file, msg.AGREEMENT_DOWNLOAD_SUCCESS);
     }),
 
-    sendAgreementByMail: asyncHandler(async (req, res) => {
+    sendAgreementByMail: withErrorHandler(async (req, res) => {
         const saleId = req.params.id;
         const preparedData = await prepareSaleData(saleId);
         const { lotRef, firstName, lastName } = preparedData;
@@ -146,7 +169,7 @@ const DocumentController = {
 
         const buffer = generateDocument(preparedData);
         await sendMailWithAttachment(filename, buffer);
-        sendSuccess(res, null, msg.AGREEMENT_EMAIL_SUCCESS);
+        return sendSuccess(res, null, msg.AGREEMENT_EMAIL_SUCCESS);
     }),
 };
 

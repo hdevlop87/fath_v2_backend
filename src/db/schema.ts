@@ -1,4 +1,4 @@
-import { timestamp, pgTable, text, varchar, integer, boolean, serial, numeric, date, primaryKey, pgEnum } from "drizzle-orm/pg-core";
+import { timestamp, pgTable, text, varchar, integer, boolean, serial, numeric, date, primaryKey, pgEnum, bigint } from "drizzle-orm/pg-core";
 
 export const userStatusEnum = pgEnum('userStatus', ['Active', 'Inactive', 'Pending']);
 export const LotStatusEnum = pgEnum('LotStatus', ['Available', 'Reserved','Ongoing', 'Sold', 'Canceled']);
@@ -79,7 +79,7 @@ export const lots = pgTable("lots", {
     lotRef: varchar("lotRef", { length: 15 }).unique().notNull(),
     status: LotStatusEnum("status").default('Available'),
     size: text("size").notNull(),
-    pricePerM2: text("pricePerM2").default('3000'),
+    pricePerM2: text("pricePerM2").default('0'),
     zoningCode: text("zoningCode").notNull(),
     description: text("description"),
 });
@@ -88,9 +88,9 @@ export const sales = pgTable("sales", {
     saleId: serial("saleId").primaryKey(),
     lotId: integer("lotId").references(() => lots.lotId, { onDelete: 'cascade' }),
     customerId: text("customerId").notNull().references(() => customers.customerId, { onDelete: 'cascade' }),
-    totalPrice: numeric("totalPrice", { precision: 10, scale: 2 }),
-    totalVerifiedPayments: numeric("totalVerifiedPayments", { precision: 10, scale: 2 }),
-    balanceDue: numeric("balanceDue", { precision: 10, scale: 2 }),
+    totalPrice: bigint("totalPrice", { mode: 'number' }),
+    totalVerifiedPayments: bigint("totalVerifiedPayments", { mode: 'number' }),
+    balanceDue: bigint("balanceDue", { mode: 'number' }),
     paidPercentage: numeric("paidPercentage", { precision: 10, scale: 2 }),
     date: date("date").defaultNow(),
     status: SaleStatusEnum("status").notNull().default('Initiated'),
@@ -101,7 +101,7 @@ export const sales = pgTable("sales", {
 export const payments = pgTable("payments", {
     paymentId: serial("paymentId").primaryKey(),
     saleId: integer("saleId").references(() => sales.saleId, { onDelete: 'cascade' }),
-    amount: numeric("amount", { precision: 10, scale: 2 }).notNull(),
+    amount: bigint("amount", { mode: 'number' }).notNull(),
     date: date("date").defaultNow(),
     method: PaymentMethodEnum("method").notNull().default('BankTransfer'),
     paymentReference: text("paymentReference"),
@@ -114,7 +114,7 @@ export const payments = pgTable("payments", {
 
 export const expenses = pgTable("expenses", {
     expenseId: serial("expenseId").primaryKey().notNull(),
-    amount: numeric("amount", { precision: 10, scale: 2 }).notNull(),
+    amount: bigint("amount", { mode: 'number' }).notNull(),
     beneficiary: text("beneficiary"),
     date: date("date").defaultNow(),
     type: ExpenseTypeEnum("type").notNull().default('Miscellaneous'),
