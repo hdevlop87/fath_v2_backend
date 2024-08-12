@@ -1,11 +1,12 @@
 import { sendSuccess, sendError, withErrorHandler } from '../../services/responseHandler';
-import { hashPassword, comparePassword } from '../../lib/utils';
+import { hashPassword, comparePassword, delay } from '../../lib/utils';
 import UserValidator from '../../Validators/auth/UserValidator';
 import RoleValidator from '../../Validators/auth/RoleValidator';
 import TokenService from '../../services/TokenService';
 import { msg } from '../../lib/constants/constants';
 import UserDb from '../../repositories/UserDb';
 import { v4 as uuidv4 } from 'uuid';
+
 
 const tokenService = new TokenService();
 const userValidator = new UserValidator();
@@ -32,7 +33,7 @@ const AuthController = {
         const accessToken = tokenService.generateAccessToken(tokenPayload);
         const refreshToken = tokenService.generateRefreshToken(tokenPayload);
         await tokenService.storeRefrechToken(user.id, refreshToken);
-
+ 
         const data = {
             accessToken,
             refreshToken,
@@ -82,6 +83,7 @@ const AuthController = {
     }),
 
     refreshToken: withErrorHandler(async (req, res) => {
+        
         const { accessToken, refreshToken, userId } = await tokenService.refreshToken(req);
 
         AuthController.sendCookies(res, refreshToken);
@@ -92,6 +94,7 @@ const AuthController = {
             accessTokenExpiresAt: tokenService.getAccessTokenExpire(),
             refreshTokenExpiresAt: tokenService.getRefreshTokenExpire()
         };
+
         return sendSuccess(res, data, msg.REFRESH_TOKEN_REFRESH_SUCCESS);
     }),
 

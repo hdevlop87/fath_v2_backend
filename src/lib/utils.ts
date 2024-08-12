@@ -169,7 +169,6 @@ export const formatDate = (dateString) => {
     return format(date, 'yyyy-MM-dd');
  };
  
- 
  export function formatCommas(x) {
    return x?.toString().replace(/(\d)(?=(\d{4})+(?!\d))/g, '$1,');
  }

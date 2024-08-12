@@ -1,5 +1,5 @@
 import UserValidator from '../Validators/auth/UserValidator'
-import { parseDuration } from '../lib/utils'
+import { delay, parseDuration } from '../lib/utils'
 import { msg } from '../lib/constants/constants';
 import { tokens } from '../db/schema';
 import { eq } from "drizzle-orm";
@@ -7,7 +7,7 @@ import { db } from '../db/index'
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 import { v4 as uuidv4 } from 'uuid';
-
+const refreshingToken = new Map<string, Promise<any>>();
 dotenv.config();
 
 const userValidator = new UserValidator();
@@ -18,7 +18,7 @@ class TokenService {
     refreshSecretKey: string;
     accessExpiresIn: string;
     refreshExpiresIn: string;
-
+    private refreshInProgress = false;
     constructor() {
         if (TokenService.instance) {
             return TokenService.instance;
@@ -112,16 +112,18 @@ class TokenService {
     public async refreshToken(req) {
         const newRefreshToken = await this.extractRefreshToken(req);
         const userId = await this.verifyRefreshToken(newRefreshToken);
-        // NOTE: can i check user await userValidator.checkUserExists(userId);
-        const storedRefreshToken = await this.getRefreshTokenDB(userId);
 
-        if (newRefreshToken !== storedRefreshToken) {
-            throw new Error(msg.REFRESH_TOKEN_EXPIRED);
-        }
+        // const storedRefreshToken = await this.getRefreshTokenDB(userId);
+        
+        // if (newRefreshToken !== storedRefreshToken) {
+        //     throw new Error(msg.REFRESH_TOKEN_EXPIRED);
+        // }
         
         const accessToken = this.generateAccessToken({ userId });
         const refreshToken = this.generateRefreshToken({ userId });
-        await this.storeRefrechToken(userId, refreshToken);
+        // await this.storeRefrechToken(userId, refreshToken);
+        // console.log('storeRefrechToken',refreshToken);
+        // console.log('========================================================='); 
         return { refreshToken, accessToken, userId };
     }
 
